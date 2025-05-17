@@ -24,7 +24,7 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="flex justify-center items-center overflow-hidden m-0 h-[90vh] w-full">
+    <div className="flex justify-center items-center overflow-hidden m-0 h-[90vh] w-full bg-teal">
       <form
         onSubmit={(e) => e.preventDefault()}
         className="bg-white p-8 rounded-xl shadow-lg max-w-md flex flex-col items-center w-11/12"

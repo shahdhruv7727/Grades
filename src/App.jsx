@@ -1,4 +1,9 @@
 import './App.css'
+import SignUpPage from './pages/SignUpPage';
+import LoginPage from './pages/LoginPage';
+
+<Route path="/login" element={<LoginPage />} />
+
 
 function App() {
 
@@ -7,6 +12,7 @@ function App() {
       <div className="text-5xl font-bold underline">
         Grades 
       </div>
+      <SignUpPage/>
     </>
   )
 }
