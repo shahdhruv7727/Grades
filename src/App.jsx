@@ -1,19 +1,21 @@
 import './App.css'
-import SignUpPage from './pages/SignUpPage';
+import SignUpPage from './pages/SignUpPage'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage';
 
-<Route path="/login" element={<LoginPage />} />
+
 
 
 function App() {
 
   return (
-    <>
-      <div className="text-5xl font-bold underline">
-        Grades 
-      </div>
-      <SignUpPage/>
-    </>
+      <Router>
+        <Routes>
+          {/* <Route path='signup' element={<SignUpPage />}/> */}
+          <Route path='/' element={<SignUpPage />}/>
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </Router> 
   )
 }
 

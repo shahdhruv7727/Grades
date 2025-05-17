@@ -1,87 +1,121 @@
-import React from "react";
-import { AiFillFire, AiOutlineUser, AiOutlineUnlock } from "react-icons/ai";
-import { BsFillKeyFill, BsFillPersonFill } from "react-icons/bs";
+import React, { useState } from "react";
+import { AiOutlineUser, AiOutlineUnlock, AiFillFire } from "react-icons/ai";
+import { BiBorderBottom } from "react-icons/bi";
+import { BsFillKeyFill } from "react-icons/bs";
 import Select from "react-select";
 
 const SignUpPage = () => {
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    confirmPassword: "",
+    role: null,
+  });
+
   const options = [
     { value: "teacher", label: "Teacher" },
     { value: "admin", label: "Admin" },
   ];
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRoleChange = (selectedOption) => {
+    setFormData((prev) => ({ ...prev, role: selectedOption }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Submitted:", formData);
+  };
+
+  const inputWrapper =
+    "flex items-center gap-3 border border-gray-300 bg-white rounded-md px-4 py-3 mb-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500";
+
   const dropdownStyles = {
-    control: () =>
-      "border border-gray-300 rounded-md px-2 py-1 bg-white focus:ring-2 focus:ring-blue-500",
-    input: () => "text-gray-800",
-    placeholder: () => "text-gray-400",
-    singleValue: () => "text-gray-800",
-    menu: () =>
-      "bg-white border border-gray-200 mt-1 rounded-md shadow-lg z-50",
-    option: ({ isFocused, isSelected }) =>
-      `px-4 py-2 cursor-pointer ${
-        isSelected ? "bg-blue-600 text-white" : isFocused ? "bg-blue-100" : ""
-      }`,
+    control: (base, state) => ({
+      ...base,
+      backgroundColor: "white",
+      BiBorderBottom: '1px solid black',
+      borderColor: state.isFocused ? "#3B82F6" : "#D1D5DB",
+      boxShadow: state.isFocused ? "0 0 0 1px #3B82F6" : "none",
+      padding: "2px",
+    }),
+    menu: (base) => ({
+      ...base,
+      zIndex: 50,
+    }),
   };
 
   return (
-    <div className="flex justify-center items-center overflow-hidden m-0 h-[90vh] w-full bg-teal">
+    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-300">
       <form
-        onSubmit={(e) => e.preventDefault()}
-        className="bg-white p-8 rounded-xl shadow-lg max-w-md flex flex-col items-center w-11/12"
+        onSubmit={handleSubmit}
+        className="w-full max-w-xl bg-white px-10 py-12 rounded-none shadow-none sm:rounded-xl sm:shadow-xl sm:w-[480px]"
       >
-        <div className="flex items-center text-3xl font-bold gap-2 mb-6">
-          <h1>Welcome to Grades!</h1>
+        <div className="flex items-center justify-center gap-2 text-3xl font-bold text-gray-800 mb-8">
           <AiFillFire className="text-orange-500" />
+          <h1>Welcome to Grades</h1>
         </div>
 
-        <div className="flex items-center border border-gray-300 rounded w-full px-3 py-2 mb-4">
-          <AiOutlineUser className="text-gray-600 mr-2" />
+        <div className={inputWrapper}>
+          <AiOutlineUser className="text-gray-500 text-lg" />
           <input
             type="text"
             name="username"
-            placeholder="What is your name?"
-            className="w-full outline-none"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="Enter your name"
+            className="w-full outline-none text-sm bg-transparent"
           />
         </div>
 
-        <div className="flex items-center border border-gray-300 rounded w-full px-3 py-2 mb-4">
-          <AiOutlineUnlock className="text-gray-600 mr-2" />
+        <div className={inputWrapper}>
+          <AiOutlineUnlock className="text-gray-500 text-lg" />
           <input
             type="password"
             name="password"
-            placeholder="What password you wanna set?"
-            className="w-full outline-none"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Enter password"
+            className="w-full outline-none text-sm bg-transparent"
           />
         </div>
 
-        <div className="flex items-center border border-gray-300 rounded w-full px-3 py-2 mb-4">
-          <BsFillKeyFill className="text-gray-600 mr-2" />
+        <div className={inputWrapper}>
+          <BsFillKeyFill className="text-gray-500 text-lg" />
           <input
             type="password"
-            name="confirm_password"
-            placeholder="Please enter your password again!"
-            className="w-full outline-none"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm password"
+            className="w-full outline-none text-sm bg-transparent"
           />
         </div>
 
-        <div className="w-full mb-6">
+        <div className="mb-6">
           <Select
+            value={formData.role}
+            onChange={handleRoleChange}
             options={options}
-            placeholder="Please select your role"
-            className={dropdownStyles}
+            placeholder="Select your role"
+            styles={dropdownStyles}
           />
         </div>
 
-        <div className="flex justify-between w-full gap-3">
+        <div className="flex gap-4">
           <button
             type="submit"
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition duration-300"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition-all duration-300"
           >
-            Register Yourself!
+            Register
           </button>
           <button
             type="button"
-            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded transition duration-300"
+            className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 rounded-md transition-all duration-300"
           >
             Sign In
           </button>
