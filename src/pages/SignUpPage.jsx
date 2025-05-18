@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { AiOutlineUser, AiOutlineUnlock, AiFillFire } from "react-icons/ai";
-import { BiBorderBottom } from "react-icons/bi";
 import { BsFillKeyFill } from "react-icons/bs";
 import Select from "react-select";
 import { MdEmail } from "react-icons/md";
@@ -62,11 +61,16 @@ const SignUpPage = () => {
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-300">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-xl bg-white px-10 py-12 rounded-none shadow-none sm:rounded-xl sm:shadow-xl sm:w-[480px]"
+        className="w-full max-w-xl bg-white px-10 py-10 rounded-none shadow-none sm:rounded-xl sm:shadow-xl sm:w-[480px]"
       >
-        <div className="flex items-center justify-center gap-2 text-3xl font-bold text-gray-800 mb-8">
-          <AiFillFire className="text-orange-500" />
-          <h1>Welcome to Grades</h1>
+        {/* <div className="flex items-center justify-center gap-2 text-3xl font-bold text-gray-800 mb-8">
+          <AiFillFire className="text-orange-500" /> 
+          <h1 className="flex">Welcome to </h1>
+          <img src="src/assets/GradesLogoT.png" alt="Grades Logo" className="h-18 object-contain" />
+        </div> */}
+        <div className="flex items-center justify-center gap-2 text-3xl font-bold text-gray-800 mb-7">
+          <span>Welcome to</span>
+          <img src="src/assets/GradesLogoTc.png" alt="Grades Logo" className="h-10 object-contain" />
         </div>
 
         <div className={inputWrapper}>
@@ -137,7 +141,7 @@ const SignUpPage = () => {
           <button
             onClick={handleClickLogin}
             type="button"
-            className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 rounded-md transition-all duration-300"
+            className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-blue-600 font-medium py-2 rounded-md transition-all duration-300"
           >
             Sign In
           </button>
