@@ -3,18 +3,23 @@ import { AiOutlineUser, AiOutlineUnlock, AiFillFire } from "react-icons/ai";
 import { BiBorderBottom } from "react-icons/bi";
 import { BsFillKeyFill } from "react-icons/bs";
 import Select from "react-select";
+import { MdEmail } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
+    email: "",
     confirmPassword: "",
     role: null,
   });
+  let Navigation = useNavigate();
 
   const options = [
     { value: "teacher", label: "Teacher" },
     { value: "admin", label: "Admin" },
+    { value: "staff", label: "Staff" },
   ];
 
   const handleChange = (e) => {
@@ -38,7 +43,7 @@ const SignUpPage = () => {
     control: (base, state) => ({
       ...base,
       backgroundColor: "white",
-      BiBorderBottom: '1px solid black',
+      BiBorderBottom: "1px solid black",
       borderColor: state.isFocused ? "#3B82F6" : "#D1D5DB",
       boxShadow: state.isFocused ? "0 0 0 1px #3B82F6" : "none",
       padding: "2px",
@@ -48,6 +53,10 @@ const SignUpPage = () => {
       zIndex: 50,
     }),
   };
+
+  const handleClickLogin = () => {
+    Navigation('/login')
+  }
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-300">
@@ -68,6 +77,18 @@ const SignUpPage = () => {
             value={formData.username}
             onChange={handleChange}
             placeholder="Enter your name"
+            className="w-full outline-none text-sm bg-transparent"
+          />
+        </div>
+
+        <div className={inputWrapper}>
+          <MdEmail className="text-gray-500 text-lg" />
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
             className="w-full outline-none text-sm bg-transparent"
           />
         </div>
@@ -114,6 +135,7 @@ const SignUpPage = () => {
             Register
           </button>
           <button
+            onClick={handleClickLogin}
             type="button"
             className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 rounded-md transition-all duration-300"
           >
