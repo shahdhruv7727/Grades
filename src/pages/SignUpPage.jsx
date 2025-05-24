@@ -55,8 +55,8 @@ const SignUpPage = () => {
   };
 
   const handleClickLogin = () => {
-    Navigation('/login')
-  }
+    Navigation("/login");
+  };
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-300">
@@ -64,10 +64,14 @@ const SignUpPage = () => {
         onSubmit={handleSubmit}
         className="w-full max-w-xl bg-white px-10 py-12 rounded-none shadow-none sm:rounded-xl sm:shadow-xl sm:w-[480px]"
       >
-        <div className="flex items-center justify-center gap-2 text-3xl font-bold text-gray-800 mb-8">
+        <div className="flex items-center justify-center gap-2 text-3xl font-bold text-gray-800 pb-0 mb-4">
           <AiFillFire className="text-orange-500" />
           <h1>Welcome to Grades</h1>
         </div>
+
+        {/* <div className="flex items-center justify-center p-1 m-1 mb-4">
+            <span className="h-[3px] bg-blue-500 w-full"></span>
+        </div> */}
 
         <div className={inputWrapper}>
           <AiOutlineUser className="text-gray-500 text-lg" />
