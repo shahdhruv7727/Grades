@@ -54,8 +54,8 @@ const SignUpPage = () => {
   };
 
   const handleClickLogin = () => {
-    Navigation('/login')
-  }
+    Navigation("/login");
+  };
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-300">
@@ -72,6 +72,10 @@ const SignUpPage = () => {
           <span>Welcome to</span>
           <img src="src/assets/GradesLogoTc.png" alt="Grades Logo" className="h-10 object-contain" />
         </div>
+
+        {/* <div className="flex items-center justify-center p-1 m-1 mb-4">
+            <span className="h-[3px] bg-blue-500 w-full"></span>
+        </div> */}
 
         <div className={inputWrapper}>
           <AiOutlineUser className="text-gray-500 text-lg" />
