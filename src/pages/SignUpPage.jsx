@@ -36,7 +36,7 @@ const SignUpPage = () => {
     
     e.preventDefault();
     console.log("Submitted:", formData);
-    const { username, email, password, confirmPassword, role } = formData;
+    const { username, email, password, role } = formData;
     const response = await axios.post('http://localhost:8002/api/users/register', {
       username,
       password,
