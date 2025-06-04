@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { AiOutlineUser, AiOutlineUnlock, AiFillFire } from "react-icons/ai";
 import { MdEmail } from "react-icons/md";
 import { Link, useNavigate } from 'react-router-dom';
+import { Toast } from '../components/commonFunctions/Toast';
+import axios from 'axios';
 
 
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    username: "",
     password: "",
     email: "",
   });
@@ -20,14 +21,39 @@ const LoginPage = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log({ email, password, role });
+    // console.log({ email, password, role });
     // Add your login logic here
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitted:", formData);
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("Submitted:", formData);
+  const { email, password } = formData;
+
+  try {
+    const response = await axios.post('http://localhost:8002/api/users/login', {
+      email,
+      password
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
+
+    console.log(response);
+
+    if (response.status === 201) {
+      Toast({ type: "success", message: "Login successful!" });
+      Navigation('/'); 
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+
+    const errorMessage = error?.response?.data?.msg || "Login failed. Please try again.";
+    Toast({ type: "error", message: errorMessage });
+  }
+};
+
 
   const inputWrapper =
     "flex items-center gap-3 border border-gray-300 bg-white rounded-md px-4 py-3 mb-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500";
@@ -44,7 +70,7 @@ const LoginPage = () => {
           <h1>Login to Grades</h1>
         </div>
 
-        <div className={inputWrapper}>
+        {/* <div className={inputWrapper}>
           <AiOutlineUser className="text-gray-500 text-lg" />
           <input
             type="text"
@@ -54,7 +80,7 @@ const LoginPage = () => {
             placeholder="Enter your name"
             className="w-full outline-none text-sm bg-transparent"
           />
-        </div>
+        </div> */}
 
         <div className={inputWrapper}>
           <MdEmail className="text-gray-500 text-lg" />
