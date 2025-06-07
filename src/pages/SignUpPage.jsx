@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { AiOutlineUser, AiOutlineUnlock, AiFillFire } from "react-icons/ai";
+import { useState } from "react";
+import { AiOutlineUser, AiOutlineUnlock } from "react-icons/ai";
 import { BsFillKeyFill } from "react-icons/bs";
 import Select from "react-select";
 import { MdEmail } from "react-icons/md";
@@ -33,7 +33,6 @@ const SignUpPage = () => {
   };
   
   const handleSubmit = async (e) => {
-    
     e.preventDefault();
     console.log("Submitted:", formData);
     const { username, email, password, role } = formData;
@@ -56,7 +55,7 @@ const SignUpPage = () => {
       }
     } catch (error) {
       console.error("Error during registration:", error );
-      Toast({ type: "error", message: error.response.data.msg});
+      Toast({ type: "error", message: error?.response?.data?.msg});
     }
 
 
@@ -84,9 +83,7 @@ const SignUpPage = () => {
     }),
   };
 
-  const handleClickLogin = () => {
-    Navigation("/login");
-  };
+  const handleClickLogin = () => { Navigation("/login") };
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-300">
@@ -159,6 +156,7 @@ const SignUpPage = () => {
         <div className="mb-6">
           <Select
             value={formData.role !== null ? options.filter((role) => role.value === formData.role) : ''}
+            name='role'
             onChange={handleRoleChange}
             options={options}
             placeholder="Select your role"

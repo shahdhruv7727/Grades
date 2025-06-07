@@ -1,6 +1,16 @@
 @import "tailwindcss";
 
-#root {
-    margin: 0 !important;
-    padding: 0 !important;
+* {
+  box-sizing : border-box;
+}
+
+html, body, #root {
+  margin: 0px !important;
+  padding: 0px !important;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+#root { 
+  max-width: 100% !important;
 }
