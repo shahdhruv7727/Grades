@@ -5,7 +5,7 @@ import useMutateHook from "../utils/useMutateHook";
 import { API } from "../API/API";
 
 const LoginPage = () => {
-  const { mutate , isLoading } = useMutateHook('/login', 'Login Failed! Please try again');
+  const { mutate , isLoading } = useMutateHook('/login', 'Login Successfull' ,'Login Failed! Please try again');
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
