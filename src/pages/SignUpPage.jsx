@@ -3,66 +3,34 @@ import { AiOutlineUser, AiOutlineUnlock } from "react-icons/ai";
 import { BsFillKeyFill } from "react-icons/bs";
 import Select from "react-select";
 import { MdEmail } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { Toast } from "../components/commonFunctions/Toast";
-
+import useMutateHook from "../utils/useMutateHook";
+import { API } from "../API/API";
 const SignUpPage = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-    email: "",
-    confirmPassword: "",
-    role: null,
-  });
-  let Navigation = useNavigate();
 
+
+  const { mutate, isLoading } = useMutateHook('/login', 'Register Successfull', 'Register Failed! Please try again');
   const options = [
     { value: "teacher", label: "Teacher" },
     { value: "admin", label: "Admin" },
     { value: "staff", label: "Staff" },
   ];
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleRoleChange = (selectedOption) => {
-    setFormData((prev) => ({ ...prev, role: selectedOption?.value }));
-  };
-  
   const handleSubmit = async (e) => {
+
     e.preventDefault();
+    const form = e.target;
+    const formData = {
+      username: form.username.value,
+      email: form.email.value,
+      password: form.password.value,
+      role: form.role.value,
+    };
+
+    console.log("Form Data:", formData);
+
+    mutate({ url: API.Register, input: formData });
     console.log("Submitted:", formData);
-    const { username, email, password, role } = formData;
-    try {
-    const response = await axios.post('http://localhost:8002/api/users/register', {
-      username,
-      password,
-      email,
-      role
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    console.log(response);
 
-      if (response.status === 201) {
-
-        Toast({ type: "success", message: "Registration successful!" });
-      }
-    } catch (error) {
-      console.error("Error during registration:", error );
-      Toast({ type: "error", message: error?.response?.data?.msg});
-    }
-
-
-
-    // });
-
-    // const registrationData = await response.json();
   };
 
   const inputWrapper =
@@ -110,8 +78,8 @@ const SignUpPage = () => {
           <input
             type="text"
             name="username"
-            value={formData.username}
-            onChange={handleChange}
+
+            
             placeholder="Enter your name"
             className="w-full outline-none text-sm bg-transparent"
           />
@@ -122,8 +90,8 @@ const SignUpPage = () => {
           <input
             type="email"
             name="email"
-            value={formData.email}
-            onChange={handleChange}
+
+           
             placeholder="Enter your email"
             className="w-full outline-none text-sm bg-transparent"
           />
@@ -134,8 +102,8 @@ const SignUpPage = () => {
           <input
             type="password"
             name="password"
-            value={formData.password}
-            onChange={handleChange}
+
+            
             placeholder="Enter password"
             className="w-full outline-none text-sm bg-transparent"
           />
@@ -146,8 +114,8 @@ const SignUpPage = () => {
           <input
             type="password"
             name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
+
+           
             placeholder="Confirm password"
             className="w-full outline-none text-sm bg-transparent"
           />
@@ -155,9 +123,8 @@ const SignUpPage = () => {
 
         <div className="mb-6">
           <Select
-            value={formData.role !== null ? options.filter((role) => role.value === formData.role) : ''}
             name='role'
-            onChange={handleRoleChange}
+            
             options={options}
             placeholder="Select your role"
             styles={dropdownStyles}
