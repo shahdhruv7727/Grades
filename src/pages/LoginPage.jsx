@@ -5,7 +5,7 @@ import useMutateHook from "../utils/useMutateHook";
 import { API } from "../API/API";
 
 const LoginPage = () => {
-  const { mutate , isLoading } = useMutateHook('/login', 'Login Successfull' ,'Login Failed! Please try again');
+  const { mutate , isLoading } = useMutateHook('/', 'Login Successfull' ,'Login Failed! Please try again');
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -13,7 +13,7 @@ const LoginPage = () => {
       email: form.email.value,
       password: form.password.value
     }
-    mutate({ url: API.Login, userData })
+    mutate({ url: API.Login,input: userData  })
   };
 
   const inputWrapper =
