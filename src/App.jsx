@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import ForgotPassPage from "./pages/ForgotPassPage";
 import { ToastContainer } from "react-toastify";
-import LandingPage from "./pages/LandingPage";
+// import LandingPage from "./pages/LandingPage";
+import LoaderPage from "./components/commonFunctions/Loader";
 
 function App() {
   return (
@@ -12,7 +13,7 @@ function App() {
       <Router>
         <Routes>
           {/* <Route path='signup' element={<SignUpPage />}/> */}
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<LoaderPage />} />
           <Route path="/register" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgotpass" element={<ForgotPassPage />} />

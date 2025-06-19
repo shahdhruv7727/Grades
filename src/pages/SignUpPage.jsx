@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AiOutlineUser, AiOutlineUnlock } from "react-icons/ai";
 import { BsFillKeyFill } from "react-icons/bs";
 import Select from "react-select";
@@ -6,7 +5,6 @@ import { MdEmail } from "react-icons/md";
 import useMutateHook from "../utils/useMutateHook";
 import { API } from "../API/API";
 const SignUpPage = () => {
-
 
   const { mutate, isLoading } = useMutateHook('/login', 'Register Successfull', 'Register Failed! Please try again');
   const options = [
@@ -16,7 +14,6 @@ const SignUpPage = () => {
   ];
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
     const form = e.target;
     const formData = {
@@ -25,12 +22,7 @@ const SignUpPage = () => {
       password: form.password.value,
       role: form.role.value,
     };
-
-    console.log("Form Data:", formData);
-
     mutate({ url: API.Register, input: formData });
-    console.log("Submitted:", formData);
-
   };
 
   const inputWrapper =
@@ -78,8 +70,6 @@ const SignUpPage = () => {
           <input
             type="text"
             name="username"
-
-            
             placeholder="Enter your name"
             className="w-full outline-none text-sm bg-transparent"
           />
@@ -90,8 +80,6 @@ const SignUpPage = () => {
           <input
             type="email"
             name="email"
-
-           
             placeholder="Enter your email"
             className="w-full outline-none text-sm bg-transparent"
           />
@@ -102,8 +90,6 @@ const SignUpPage = () => {
           <input
             type="password"
             name="password"
-
-            
             placeholder="Enter password"
             className="w-full outline-none text-sm bg-transparent"
           />
@@ -114,8 +100,6 @@ const SignUpPage = () => {
           <input
             type="password"
             name="confirmPassword"
-
-           
             placeholder="Confirm password"
             className="w-full outline-none text-sm bg-transparent"
           />
@@ -124,7 +108,6 @@ const SignUpPage = () => {
         <div className="mb-6">
           <Select
             name='role'
-            
             options={options}
             placeholder="Select your role"
             styles={dropdownStyles}

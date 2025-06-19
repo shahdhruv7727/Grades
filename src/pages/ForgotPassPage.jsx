@@ -4,8 +4,6 @@ import { BsFillKeyFill } from "react-icons/bs";
 import { MdEmail } from "react-icons/md";
 import { Link, useNavigate } from 'react-router-dom';
 
-
-
 const ForgotPassPage = () => {
     const [formData, setFormData] = useState({
         email: "",
