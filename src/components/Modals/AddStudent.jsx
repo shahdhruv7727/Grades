@@ -136,7 +136,6 @@ const AddStudent = () => {
                 </div>
               </div>
               <div className={mainWrapper}>
-                {/* <div className={inputWrapper}> */}
                 <Select
                   className="w-8/12"
                   styles={dropdownStyles}
@@ -151,7 +150,6 @@ const AddStudent = () => {
                     className="w-full outline-none text-sm bg-transparent"
                   />
                 </div>
-                {/* </div> */}
               </div>
               <div className={mainWrapper}>
                 <div className={inputWrapper}>
