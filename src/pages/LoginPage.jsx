@@ -5,15 +5,19 @@ import useMutateHook from "../utils/useMutateHook";
 import { API } from "../API/API";
 
 const LoginPage = () => {
-  const { mutate , isLoading } = useMutateHook('/login', 'Login Successfull' ,'Login Failed! Please try again');
+  const { mutate, isLoading } = useMutateHook(
+    "/login",
+    "Login Successfull",
+    "Login Failed! Please try again"
+  );
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
     const userData = {
       email: form.email.value,
-      password: form.password.value
-    }
-    mutate({ url: API.Login, userData })
+      password: form.password.value,
+    };
+    mutate({ url: API.Login, input: userData });
   };
 
   const inputWrapper =
@@ -40,7 +44,6 @@ const LoginPage = () => {
             className="w-full outline-none text-sm bg-transparent"
           />
         </div>
-
         <div className={inputWrapper}>
           <AiOutlineUnlock className="text-gray-500 text-lg" />
           <input

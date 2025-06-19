@@ -1,36 +1,17 @@
 import "./App.css";
-import SignUpPage from "./pages/SignUpPage";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import ForgotPassPage from "./pages/ForgotPassPage";
+import React from "react";
+import { BrowserRouter as Router } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import LandingPage from "./pages/LandingPage";
+import AppRoutes from "./Routes/Routes";
 
 function App() {
   return (
-    <>
+    <React.Fragment>
       <Router>
-        <Routes>
-          {/* <Route path='signup' element={<SignUpPage />}/> */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/register" element={<SignUpPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgotpass" element={<ForgotPassPage />} />
-        </Routes>
+        <AppRoutes/>
       </Router>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-    </>
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light"/>
+    </React.Fragment>
   );
 }
 
