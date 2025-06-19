@@ -3,7 +3,7 @@ import React from 'react'
 const SideBar = () => {
   return (
     <div>
-      SideBarr hai bhaiiiiiii
+      SideBarr hai bhaiiiiiii, changes 
     </div>
   )
 }
