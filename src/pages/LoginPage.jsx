@@ -40,7 +40,6 @@ const LoginPage = () => {
             className="w-full outline-none text-sm bg-transparent"
           />
         </div>
-
         <div className={inputWrapper}>
           <AiOutlineUnlock className="text-gray-500 text-lg" />
           <input

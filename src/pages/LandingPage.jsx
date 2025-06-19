@@ -2,8 +2,10 @@ import React from "react";
 
 const LandingPage = () => {
   return (
-    <h1>landing Page</h1>
-  )
+    <div>
+      <h1>Dash board</h1>
+    </div>
+  );
 };
 
 export default LandingPage;

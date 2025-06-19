@@ -9,6 +9,6 @@ createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}>
     <StrictMode>
       <App />
-    </StrictMode>,
+    </StrictMode>
   </QueryClientProvider>
 )
