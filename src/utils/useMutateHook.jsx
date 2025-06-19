@@ -8,7 +8,7 @@ const useMutateHook = (navigateUrl, customSuccessMessage , customErrorMessage = 
   const { mutate, isLoading } = useMutation({
     mutationFn: ({ url, input}) => SendPOSTRequest(url, input),
     onSuccess: (data) => {
-      Toast({ type: "success", message: customSuccessMessage ? customSuccessMessage : data?.response?.msg });
+      Toast({ type: "success", message: customSuccessMessage ? customSuccessMessage : data?.response?.data?.msg });
       navigateUrl && Navigation(navigateUrl);
     },
     onError: (error) => {
@@ -21,5 +21,4 @@ const useMutateHook = (navigateUrl, customSuccessMessage , customErrorMessage = 
 
   return { mutate, isLoading };
 };    
-
 export default useMutateHook;
