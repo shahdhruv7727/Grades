@@ -62,10 +62,11 @@ const MaskedDatePicker = ({ date, setDate }) => {
         onChange={handleDateSelect}
         dateFormat="dd/MM/yyyy"
         ref={datepickerRef}
-        className="w-full outline-none text-sm py-1 bg-transparent placeholder-gray-400"
+        className="w-full sm:w-32 outline-none text-sm py-1 bg-transparent placeholder-gray-400"
         customInput={
           <div className="border-none outline-none">
             <input
+              id="datepicker"
               type="text"
               placeholder="__/___/____"
               value={inputValue}

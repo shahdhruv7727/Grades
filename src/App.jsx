@@ -9,10 +9,10 @@ function App() {
   return (
     <React.Fragment>
       <AuthProvider>
-      <Router>
-        <AppRoutes/>
-      </Router>
-      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light"/>
+        <Router>
+          <AppRoutes/>
+        </Router>
+       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light"/>
       </AuthProvider>
     </React.Fragment>
   );

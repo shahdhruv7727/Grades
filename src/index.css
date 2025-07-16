@@ -14,3 +14,7 @@ html, body, #root {
 #root { 
   max-width: 100% !important;
 }
+
+::-webkit-scrollbar {
+  display: none;
+}
