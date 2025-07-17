@@ -6,8 +6,8 @@ import { API } from "../API/API";
 import { handleEnterKeyDown } from "../components/commonFunctions/HandleEnterInput";
 
 const LoginPage = () => {
-  const { mutate, isLoading } = useMutateHook(
-    "/",
+  const { mutate, isLoading } =  useMutateHook(
+    "/wha",
     "Login Successfull",
     "Login Failed! Please try again"
   );
@@ -19,8 +19,11 @@ const LoginPage = () => {
       email: form.email?.value,
       password: form.password?.value,
     };
-    mutate({ url: API.Login, input: userData });
+    const response = await mutate({ url: API.Login, input: userData });
+    console.log(response);
   };
+
+ 
 
   const inputWrapper =
     "relative flex items-center gap-3 border-2 border-gray-200 bg-white/80 backdrop-blur-sm rounded-xl px-4 py-3 mb-6 shadow-lg focus-within:ring-4 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all duration-300 hover:shadow-xl";
