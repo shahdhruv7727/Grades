@@ -4,23 +4,9 @@ import { useForm, Controller } from 'react-hook-form';
 import { IoPersonSharp, IoSchoolSharp, IoLocationSharp, IoCallSharp, IoCalendarSharp } from 'react-icons/io5';
 import { MdEmail, MdClass, MdAccountBalance, MdClose } from 'react-icons/md';
 import { FaGraduationCap, FaMapMarkerAlt, FaRupeeSign } from 'react-icons/fa';
+import { Select } from '../commonFunctions/CommonSelectFxn';
 
-// Mock Select component since we can't import react-select
-const Select = ({ options, placeholder, value, onChange, isDisabled = false }) => (
-  <select
-    value={value || ''}
-    onChange={(e) => onChange(e.target.value)}
-    disabled={isDisabled}
-    className="w-full outline-none text-sm bg-transparent cursor-pointer"
-  >
-    <option value="">{placeholder}</option>
-    {options.map((option) => (
-      <option key={option.value} value={option.value}>
-        {option.label}
-      </option>
-    ))}
-  </select>
-);
+
 
 const AddStudent = ({ isOpen, setIsOpen }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -48,7 +34,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
       phoneNumber: "",
       dateOfBirth: ""
     },
-    mode: 'onChange'
+    mode: 'onBlur'
   });
 
   // Static data moved outside component to prevent re-creation
@@ -153,43 +139,45 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
   ));
 
   // Optimized select component
-  const CustomSelect = React.memo(({ 
-    options, 
-    placeholder, 
-    name, 
-    rules = {}, 
-    icon: Icon,
-    disabled = false 
-  }) => (
-    <div className="space-y-1">
-      <Controller
-        name={name}
-        control={control}
-        rules={rules}
-        render={({ field }) => (
-          <div className={`flex items-center gap-3 border-2 ${
-            errors[name] ? 'border-red-300' : 'border-gray-200'
-          } bg-white rounded-xl px-4 py-3 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 hover:border-gray-300 ${
-            disabled ? 'bg-gray-50' : ''
-          }`}>
-            <Icon className={`text-lg flex-shrink-0 ${
-              disabled ? 'text-gray-300' : errors[name] ? 'text-red-400' : 'text-gray-400'
-            }`} />
-            <Select
-              options={options}
-              placeholder={placeholder}
-              value={field.value}
-              onChange={field.onChange}
-              isDisabled={disabled}
-            />
-          </div>
-        )}
-      />
-      {errors[name] && (
-        <p className="text-red-500 text-xs mt-1 ml-1">{errors[name].message}</p>
-      )}
-    </div>
-  ));
+  // const Select = React.memo(({ 
+  //   options, 
+  //   placeholder, 
+  //   name, 
+  //   rules = {}, 
+  //   icon: Icon,
+  //   disabled = false 
+  // }) => (
+  //   <div className="space-y-1">
+  //     <Controller
+  //       name={name}
+  //       control={control}
+  //       rules={rules}
+  //       render={({ field }) => (
+  //         <div className={`flex items-center gap-3 border-2 ${
+  //           errors[name] ? 'border-red-300' : 'border-gray-200'
+  //         } bg-white rounded-xl px-4 py-3 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 hover:border-gray-300 ${
+  //           disabled ? 'bg-gray-50' : ''
+  //         }`}>
+  //           <Icon className={`text-lg flex-shrink-0 ${
+  //             disabled ? 'text-gray-300' : errors[name] ? 'text-red-400' : 'text-gray-400'
+  //           }`} />
+  //           <Select
+  //           control={control}
+  //           name={name}
+  //             options={options}
+  //             placeholder={placeholder}
+  //             value={field.value}
+  //             onChange={field.onChange}
+  //             isDisabled={disabled}
+  //           />
+  //         </div>
+  //       )}
+  //     />
+  //     {errors[name] && (
+  //       <p className="text-red-500 text-xs mt-1 ml-1">{errors[name].message}</p>
+  //     )}
+  //   </div>
+  // ));
 
   const renderStep = () => {
     switch(currentStep) {
@@ -267,14 +255,18 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
             </div>
             
             <div className="grid md:grid-cols-2 gap-4">
-              <CustomSelect
+              <Select
+               errors={errors}
+                control={control}
                 icon={MdClass}
                 options={standardClassOptions}
                 placeholder="Select Class/Standard"
                 name="standard"
                 rules={{ required: "Please select a standard" }}
               />
-              <CustomSelect
+              <Select
+              errors={errors}
+              control={control}
                 icon={MdAccountBalance}
                 options={boardOptions}
                 placeholder="Select Board"
@@ -341,7 +333,9 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                   minLength: { value: 2, message: "City must be at least 2 characters" }
                 }}
               />
-              <CustomSelect
+              <Select
+              errors={errors}
+              control={control}
                 icon={FaMapMarkerAlt}
                 options={stateOptions}
                 placeholder="Select State"

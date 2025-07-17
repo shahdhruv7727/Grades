@@ -1,10 +1,10 @@
-export const dropdownStyles = {
+export  const dropdownStyles = {
   control: (base) => ({
     ...base,
     boxShadow: "none",   
     backgroundColor: "white",
-    padding: "2px",
-    height: "46px",
+    padding: "0px",
+    height: "0px",
     BiBorderRadius: "12px",
     border: "none",
     outline: "none",

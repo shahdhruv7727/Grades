@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const useMutateHook = (navigateUrl, customSuccessMessage , customErrorMessage = "Something went wrong!") => {
   const Navigation = useNavigate();
-  const { mutate, isLoading } = useMutation({
+  const { mutateAsync, isLoading } = useMutation({
     mutationFn: ({ url, input}) => SendPOSTRequest(url, input),
     onSuccess: (data) => {
       Toast({ type: "success", message: customSuccessMessage ? customSuccessMessage : data?.response?.data?.msg });
@@ -19,6 +19,6 @@ const useMutateHook = (navigateUrl, customSuccessMessage , customErrorMessage = 
     },
   });
 
-  return { mutate, isLoading };
+  return { mutate: mutateAsync, isLoading };
 };    
 export default useMutateHook;
