@@ -8,6 +8,7 @@ import SideBarLayout from "../layout/SideBarLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import Loader from "../components/commonFunctions/Loader";
 import StudentTable from "../pages/Listing";
+import StudentList from "../pages/RegistrationForm";
 
 const AppRoutes = () => {
   return (
