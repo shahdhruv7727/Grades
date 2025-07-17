@@ -87,6 +87,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
     if (isValid) {
       setCurrentStep(prev => Math.min(prev + 1, 3));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
   const prevStep = useCallback(() => {

@@ -30,6 +30,7 @@ function Loader() {
     const interval = setInterval(updateFact, 1500);
 
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
