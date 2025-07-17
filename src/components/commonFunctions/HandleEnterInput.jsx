@@ -1,12 +1,13 @@
 export const handleEnterKeyDown = (e, skipInput = "none") => {
   if (e.key === "Enter") {
-    !e.target.tagName === "BUTTON" && e.preventDefault();
+    // e.preventDefault();
+    if (e.target.tagName !== "BUTTON") {
+      e.preventDefault();
+    }
     const inputs = Array.from(
-      document.querySelectorAll("input:not([disabled])")
+      document.querySelectorAll(`input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled])`)
     );
     const nextElement = document.querySelectorAll("button");
-    console.log(inputs, nextElement, e.target.tagName === "BUTTON");
-
     const activeInput = document.activeElement;
     const currentIndex = inputs.findIndex((input) => input === activeInput);
 
