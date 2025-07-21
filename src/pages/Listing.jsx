@@ -1,5 +1,8 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { API } from "../API/API";
+import { SendGETRequest } from "../services/SendGETRequest";
+import axios from 'axios';
 import {
   FaSearch,
   FaFilter,
@@ -32,102 +35,63 @@ const StudentTable = () => {
   const [filterBoard, setFilterBoard] = useState("");
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [openStudentForm, setOpenStudentForm] = useState(false);
+  const [students, setStudents] = useState([]);
+  
+  // ADD THESE MISSING STATE VARIABLES
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample student data
-  const [students] = useState([
-    {
-      id: 1,
-      name: "Aarav Patel",
-      class: "10th",
-      board: "CBSE",
-      school: "Delhi Public School",
-      email: "aarav.patel@email.com",
-      phone: "+91 98765 43210",
-      address: "Ahmedabad, Gujarat",
-      dateOfBirth: "2008-03-15",
-      fees: "₹15,000",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    },
-    {
-      id: 2,
-      name: "Priya Sharma",
-      class: "9th",
-      board: "ICSE",
-      school: "Ryan International School",
-      email: "priya.sharma@email.com",
-      phone: "+91 87654 32109",
-      address: "Mumbai, Maharashtra",
-      dateOfBirth: "2009-07-22",
-      fees: "₹12,000",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-    },
-    {
-      id: 3,
-      name: "Arjun Singh",
-      class: "8th",
-      board: "State Board",
-      school: "Kendriya Vidyalaya",
-      email: "arjun.singh@email.com",
-      phone: "+91 76543 21098",
-      address: "Pune, Maharashtra",
-      dateOfBirth: "2010-11-08",
-      fees: "₹8,000",
-      status: "Inactive",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    },
-    {
-      id: 4,
-      name: "Sneha Gupta",
-      class: "10th",
-      board: "CBSE",
-      school: "DPS International",
-      email: "sneha.gupta@email.com",
-      phone: "+91 65432 10987",
-      address: "Bangalore, Karnataka",
-      dateOfBirth: "2008-05-12",
-      fees: "₹18,000",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    },
-    {
-      id: 5,
-      name: "Vikram Mehta",
-      class: "7th",
-      board: "IB",
-      school: "International School",
-      email: "vikram.mehta@email.com",
-      phone: "+91 54321 09876",
-      address: "Chennai, Tamil Nadu",
-      dateOfBirth: "2011-09-30",
-      fees: "₹25,000",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-    },
-    {
-      id: 6,
-      name: "Ananya Desai",
-      class: "9th",
-      board: "CBSE",
-      school: "Zydus School",
-      email: "ananya.desai@email.com",
-      phone: "+91 43210 98765",
-      address: "Ahmedabad, Gujarat",
-      dateOfBirth: "2009-01-18",
-      fees: "₹14,000",
-      status: "Active",
-      avatar:
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-    },
-  ]);
+  // MOVE useEffect TO COMPONENT LEVEL (not inside a function)
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await SendGETRequest(API.Students); 
+        console.log('Fetched students:', response);
+        
+        // Validate response structure
+        if (!response || !response.data || !Array.isArray(response.data.students)) {
+          console.error('Invalid response structure:', response);
+          setError('Invalid data format received');
+          return;
+        }
 
-  // Filter and sort students
+        const transformed = response.data.students.map((student) => ({
+          id: student.id,
+          name: student.name,
+          class: student.standard,
+          board: student.board,
+          school: student.school,
+          email: student.email,
+          phone: student.mobilePhone1,
+          address: student.address,
+          dateOfBirth: student.dateOfBirth,
+          fees: student.fees,
+          status: student.status,
+          avatar: student.avatar || 
+            `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face`,
+        }));
+
+        console.log('Transformed students:', transformed);
+        setStudents(transformed);
+      } catch (error) {
+        console.error('Failed to fetch students:', error);
+        setError(error.message || 'Failed to fetch students');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchStudents();
+  }, []);
+
+  console.log('Students state:', students);
+
+  // REMOVE THE StudentList FUNCTION - IT'S NOT NEEDED
+
+  // Filter and sort students - ADD students BACK TO DEPENDENCY ARRAY
   const filteredAndSortedStudents = useMemo(() => {
     let filtered = students.filter((student) => {
       const matchesSearch =
@@ -158,7 +122,7 @@ const StudentTable = () => {
 
     return filtered;
   }, [
-    students,
+    students, // ADD THIS BACK!
     searchTerm,
     sortField,
     sortDirection,
@@ -298,6 +262,36 @@ const StudentTable = () => {
       </div>
     </div>
   );
+
+  // ADD EARLY RETURNS FOR LOADING AND ERROR STATES
+  if (loading) {
+    return (
+      <div className="bg-gray-50 min-h-screen p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading students...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-gray-50 min-h-screen p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Students</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen p-6">
@@ -452,7 +446,7 @@ const StudentTable = () => {
         </div>
 
         {/* Content */}
-        {viewMode === "table" && filteredAndSortedStudents.length ? (
+        {viewMode === "table" && filteredAndSortedStudents.length > 0 ? (
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -590,16 +584,14 @@ const StudentTable = () => {
               </table>
             </div>
           </div>
-        ) : (
+        ) : viewMode === "grid" && filteredAndSortedStudents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedStudents.map((student) => (
               <StudentCard key={student.id} student={student} />
             ))}
           </div>
-        )}
-
-        {/* Empty State */}
-        {filteredAndSortedStudents.length === 0 && (
+        ) : (
+          /* Empty State */
           <div className="bg-white rounded-xl shadow-lg p-12 text-center">
             <FaUserGraduate className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-gray-900 mb-2">
@@ -608,7 +600,10 @@ const StudentTable = () => {
             <p className="text-gray-500 mb-6">
               Try adjusting your search or filter criteria
             </p>
-            <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200">
+            <button 
+              onClick={() => setOpenStudentForm(true)}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+            >
               <FaPlus className="w-4 h-4 mr-2 inline" />
               Add Your First Student
             </button>
