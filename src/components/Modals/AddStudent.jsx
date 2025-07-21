@@ -10,6 +10,8 @@ import { Select } from '../commonFunctions/CommonSelectFxn';
 
 const AddStudent = ({ isOpen, setIsOpen }) => {
   const [currentStep, setCurrentStep] = useState(1);
+
+
   
   const {
     control,
