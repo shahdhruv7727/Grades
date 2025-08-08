@@ -51,7 +51,7 @@ const MaskedDatePicker = ({
 
   useEffect(() => {
     // eslint-disable-next-line valid-typeof
-    if (typeof date === "String") {
+    if (typeof date === "string") {
       setDateValue(convertStringIntoDateObject(date));
     }
   }, [dateValue, date]);
