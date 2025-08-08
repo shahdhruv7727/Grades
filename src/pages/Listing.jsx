@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { API } from "../API/API";
 import { SendGETRequest } from "../services/SendGETRequest";
-import axios from 'axios';
+import axios from "axios";
 import {
   FaSearch,
   FaFilter,
@@ -21,10 +21,12 @@ import {
   FaCalendarAlt,
   FaUserGraduate,
   FaSchool,
+  FaIcons,
 } from "react-icons/fa";
 import { MdGridView, MdViewList, MdFilterList } from "react-icons/md";
 import { IoPersonSharp } from "react-icons/io5";
 import AddStudent from "../components/Modals/AddStudent";
+import { FaFileExport, FaFileImport  } from "react-icons/fa6";
 
 const StudentTable = () => {
   const [viewMode, setViewMode] = useState("table"); // 'table' or 'grid'
@@ -36,58 +38,58 @@ const StudentTable = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [openStudentForm, setOpenStudentForm] = useState(false);
   const [students, setStudents] = useState([]);
-  
+
   // ADD THESE MISSING STATE VARIABLES
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // MOVE useEffect TO COMPONENT LEVEL (not inside a function)
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await SendGETRequest(API.Students); 
-        console.log('Fetched students:', response);
-        
-        // Validate response structure
-        if (!response || !response.data || !Array.isArray(response.data.students)) {
-          console.error('Invalid response structure:', response);
-          setError('Invalid data format received');
-          return;
-        }
+  // useEffect(() => {
+  //   const fetchStudents = async () => {
+  //     try {
+  //       setLoading(true);
+  //       setError(null);
 
-        const transformed = response.data.students.map((student) => ({
-          id: student.id,
-          name: student.name,
-          class: student.standard,
-          board: student.board,
-          school: student.school,
-          email: student.email,
-          phone: student.mobilePhone1,
-          address: student.address,
-          dateOfBirth: student.dateOfBirth,
-          fees: student.fees,
-          status: student.status,
-          avatar: student.avatar || 
-            `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face`,
-        }));
+  //       const response = await SendGETRequest(API.Students);
+  //       console.log('Fetched students:', response);
 
-        console.log('Transformed students:', transformed);
-        setStudents(transformed);
-      } catch (error) {
-        console.error('Failed to fetch students:', error);
-        setError(error.message || 'Failed to fetch students');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchStudents();
-  }, []);
+  //       // Validate response structure
+  //       if (!response || !response.data || !Array.isArray(response.data.students)) {
+  //         console.error('Invalid response structure:', response);
+  //         setError('Invalid data format received');
+  //         return;
+  //       }
 
-  console.log('Students state:', students);
+  //       const transformed = response.data.students.map((student) => ({
+  //         id: student.id,
+  //         name: student.name,
+  //         class: student.standard,
+  //         board: student.board,
+  //         school: student.school,
+  //         email: student.email,
+  //         phone: student.mobilePhone1,
+  //         address: student.address,
+  //         dateOfBirth: student.dateOfBirth,
+  //         fees: student.fees,
+  //         status: student.status,
+  //         avatar: student.avatar ||
+  //           `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face`,
+  //       }));
+
+  //       console.log('Transformed students:', transformed);
+  //       setStudents(transformed);
+  //     } catch (error) {
+  //       console.error('Failed to fetch students:', error);
+  //       setError(error.message || 'Failed to fetch students');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchStudents();
+  // }, []);
+
+  console.log("Students state:", students);
 
   // REMOVE THE StudentList FUNCTION - IT'S NOT NEEDED
 
@@ -264,26 +266,28 @@ const StudentTable = () => {
   );
 
   // ADD EARLY RETURNS FOR LOADING AND ERROR STATES
-  if (loading) {
-    return (
-      <div className="bg-gray-50 min-h-screen p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading students...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="bg-gray-50 min-h-screen p-6 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+  //         <p className="text-gray-600">Loading students...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (
       <div className="bg-gray-50 min-h-screen p-6 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Students</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Error Loading Students
+          </h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
@@ -312,11 +316,18 @@ const StudentTable = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              <button className="group relative w-max overflow-hidden bg-gradient-to-r from-yellow-600 to-yellow-800 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-medium">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-700 to-yellow-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center gap-2 h-[17px]">
+                  <FaFileImport className="w-4 h-4" />
+                  Import
+                </div>
+              </button>
               <button className="group relative w-max overflow-hidden bg-gradient-to-r from-green-600 to-green-800 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-medium">
                 <div className="absolute inset-0 bg-gradient-to-r from-green-700 to-green-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative flex items-center gap-2 h-[17px]">
-                  <FaDownload className="w-4 h-4" />
-                   Export
+                  <FaFileExport className="w-4 h-4" />
+                  Export
                 </div>
               </button>
               <button
@@ -600,7 +611,7 @@ const StudentTable = () => {
             <p className="text-gray-500 mb-6">
               Try adjusting your search or filter criteria
             </p>
-            <button 
+            <button
               onClick={() => setOpenStudentForm(true)}
               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200"
             >

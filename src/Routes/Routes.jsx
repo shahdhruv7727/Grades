@@ -8,7 +8,7 @@ import SideBarLayout from "../layout/SideBarLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import Loader from "../components/commonFunctions/Loader";
 import StudentTable from "../pages/Listing";
-import StudentList from "../pages/RegistrationForm";
+// import StudentList from "../pages/RegistrationForm";
 
 const AppRoutes = () => {
   return (
@@ -39,17 +39,22 @@ const AppRoutes = () => {
       <Route path="/forgotpass" element={<ForgotPassPage />} />
       <Route path="/" element={<LoginPage />} />
       <Route path="/loader" element={<Loader />} />
+      <Route path="*" element={
+        <ProtectedRoute>
+          <SideBarLayout insideComponent={<LandingPage/>} />
+        </ProtectedRoute>
+      }/>
       {/* <Route path="*" element={<Loader />} /> */}
       <Route
         path="/studentt"
         element={
-          <SideBarLayout insideComponent={<AddStudent />} label={"Student"} />
+          <SideBarLayout insideComponent={<LandingPage />} />
         }
       />
-      {/* <Route
+      <Route
         path="/loaderr"
         element={<SideBarLayout insideComponent={<Loader />} />}
-      /> */}
+      />
       <Route
         path="/wha"
         element={<SideBarLayout insideComponent={<StudentTable />} />}
