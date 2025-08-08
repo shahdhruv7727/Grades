@@ -12,6 +12,89 @@ import { MdEmail, MdClass, MdAccountBalance, MdClose } from "react-icons/md";
 import { FaGraduationCap, FaMapMarkerAlt, FaRupeeSign } from "react-icons/fa";
 import { Select } from "../commonFunctions/CommonSelectFxn";
 import MaskedDatePicker from "../commonFunctions/MaskedDatePicker";
+
+const InputField = React.memo(
+  ({
+    icon: Icon,
+    type = "text",
+    placeholder,
+    name,
+    rules = {},
+    disabled = false,
+    prefix,
+    CustomComponent,
+    setDate,
+    date,
+    className,
+    control,
+    errors,
+  }) => (
+    <div className="space-y-1">
+      <Controller
+        name={name}
+        control={control}
+        rules={rules}
+        render={({ field }) => (
+          <>
+            {!CustomComponent ? (
+              <div
+                className={`flex items-center gap-3 border-2 ${
+                  errors[name] ? "border-red-300" : "border-gray-200"
+                } bg-white rounded-xl px-4 py-3 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 hover:border-gray-300 ${
+                  disabled ? "bg-gray-50" : ""
+                }`}
+              >
+                {!CustomComponent && (
+                  <Icon
+                    className={`text-lg flex-shrink-0 ${
+                      disabled
+                        ? "text-gray-300"
+                        : errors[name]
+                        ? "text-red-400"
+                        : "text-gray-400"
+                    }`}
+                  />
+                )}
+                {prefix && (
+                  <span className="text-gray-500 border-r border-gray-200 pr-3">
+                    {prefix}
+                  </span>
+                )}
+                {!CustomComponent && (
+                  <input
+                    {...field}
+                    type={type}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    className={`w-full outline-none text-sm bg-transparent ${
+                      disabled ? "text-gray-400" : ""
+                    }`}
+                  />
+                )}
+              </div>
+            ) : (
+              <CustomComponent
+                {...field}
+                setDate={setDate}
+                date={date}
+                disabled={disabled}
+                name={name}
+                className={className}
+                placeholder={placeholder}
+                // className={`w-full outline-none text-sm bg-transparent ${
+                //   disabled ? "text-gray-400" : ""
+                // }`}
+              />
+            )}
+          </>
+        )}
+      />
+      {errors[name] && (
+        <p className="text-red-500 text-xs mt-1 ml-1">{errors[name].message}</p>
+      )}
+    </div>
+  )
+);
 const AddStudent = ({ isOpen, setIsOpen }) => {
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -38,11 +121,14 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
       state: "",
       phoneNumber: "",
       dateOfBirth: "",
+      admissionDate: "",
     },
     mode: "onBlur",
   });
 
   const watchValues = watch();
+  const dateOfBirth = watch("dateOfBirth");
+  const admissionDate = watch("admissionDate");
 
   // Static data moved outside component to prevent re-creation
   const standardClassOptions = [
@@ -68,7 +154,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
 
   // Validation rules for each step
   const stepValidationFields = {
-    1: ["firstName", "lastName", "parentEmail", "dateOfBirth"],
+    1: ["firstName", "lastName", "parentEmail", "dateOfBirth", "admissionDate"],
     2: ["standard", "board", "school"],
     3: ["address", "city", "state", "phoneNumber"],
   };
@@ -104,86 +190,6 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
   }, [setIsOpen, reset]);
 
   // Optimized input component
-  const InputField = React.memo(
-    ({
-      icon: Icon,
-      type = "text",
-      placeholder,
-      name,
-      rules = {},
-      disabled = false,
-      prefix,
-      CustomComponent,
-      setDate,
-      date,
-
-    }) => (
-      <div className="space-y-1">
-        <Controller
-          name={name}
-          control={control}
-          rules={rules}
-          render={({ field }) => (
-            <>
-              {!CustomComponent ? (
-                <div
-                  className={`flex items-center gap-3 border-2 ${
-                    errors[name] ? "border-red-300" : "border-gray-200"
-                  } bg-white rounded-xl px-4 py-3 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 hover:border-gray-300 ${
-                    disabled ? "bg-gray-50" : ""
-                  }`}
-                >
-                  {!CustomComponent && (
-                    <Icon
-                      className={`text-lg flex-shrink-0 ${
-                        disabled
-                          ? "text-gray-300"
-                          : errors[name]
-                          ? "text-red-400"
-                          : "text-gray-400"
-                      }`}
-                    />
-                  )}
-                  {prefix && (
-                    <span className="text-gray-500 border-r border-gray-200 pr-3">
-                      {prefix}
-                    </span>
-                  )}
-                  {!CustomComponent && (
-                    <input
-                      {...field}
-                      type={type}
-                      placeholder={placeholder}
-                      disabled={disabled}
-                      className={`w-full outline-none text-sm bg-transparent ${
-                        disabled ? "text-gray-400" : ""
-                      }`}
-                    />
-                  )}
-                </div>
-              ) : (
-                <CustomComponent
-                  {...field}
-                  setDate={setDate}
-                  date={date}
-                  disabled={disabled}
-                  name={name}
-                  // className={`w-full outline-none text-sm bg-transparent ${
-                  //   disabled ? "text-gray-400" : ""
-                  // }`}
-                />
-              )}
-            </>
-          )}
-        />
-        {errors[name] && (
-          <p className="text-red-500 text-xs mt-1 ml-1">
-            {errors[name].message}
-          </p>
-        )}
-      </div>
-    )
-  );
 
   // Optimized select component
   // const Select = React.memo(({
@@ -248,6 +254,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                 icon={IoPersonSharp}
                 placeholder="First Name"
                 name="firstName"
+                className="w-50"
                 rules={{
                   required: "First name is required",
                   minLength: {
@@ -255,11 +262,15 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                     message: "First name must be at least 2 characters",
                   },
                 }}
+                control={control}
+                errors={errors}
               />
               <InputField
                 icon={IoPersonSharp}
                 placeholder="Middle Name"
                 name="middleName"
+                control={control}
+                errors={errors}
               />
             </div>
 
@@ -274,6 +285,8 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                   message: "Last name must be at least 2 characters",
                 },
               }}
+              control={control}
+              errors={errors}
             />
 
             <InputField
@@ -288,18 +301,36 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                   message: "Invalid email address",
                 },
               }}
+              control={control}
+              errors={errors}
             />
-
-            <InputField
-              icon={IoCalendarSharp}
-              type="date"
-              placeholder="Date of Birth"
-              name="dateOfBirth"
-              setDate={setValue}
-              date={watchValues?.dateOfBirth}
-              rules={{ required: "Date of birth is required" }}
-              CustomComponent={MaskedDatePicker}
-            />
+            <div className="flex gap-2 justify-center">
+              <InputField
+                icon={IoCalendarSharp}
+                type="date"
+                placeholder="Date of Birth"
+                name="dateOfBirth"
+                setDate={setValue}
+                date={dateOfBirth}
+                className={'w-60'}
+                rules={{ required: "Date of birth is required" }}
+                CustomComponent={MaskedDatePicker}
+                control={control}
+                errors={errors}
+              />
+              <InputField
+                icon={IoCalendarSharp}
+                type="date"
+                placeholder="Admission Date"
+                name="admissionDate"
+                setDate={setValue}
+                date={admissionDate}
+                rules={{ required: "Admission Date is required" }}
+                CustomComponent={MaskedDatePicker}
+                control={control}
+                errors={errors}
+              />
+            </div>
           </div>
         );
 
@@ -350,6 +381,8 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                   message: "School name must be at least 3 characters",
                 },
               }}
+              control={control}
+              errors={errors}
             />
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -358,12 +391,16 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                 placeholder="Monthly Fees"
                 name="fees"
                 disabled
+                control={control}
+                errors={errors}
               />
               <InputField
                 icon={IoCalendarSharp}
                 placeholder="Tenure (Auto-calculated)"
                 name="tenure"
                 disabled
+                control={control}
+                errors={errors}
               />
             </div>
           </div>
@@ -395,6 +432,8 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                   message: "Address must be at least 10 characters",
                 },
               }}
+              control={control}
+              errors={errors}
             />
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -409,6 +448,8 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                     message: "City must be at least 2 characters",
                   },
                 }}
+                control={control}
+                errors={errors}
               />
               <Select
                 errors={errors}
@@ -434,6 +475,8 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                 },
               }}
               prefix="+91"
+              control={control}
+              errors={errors}
             />
           </div>
         );

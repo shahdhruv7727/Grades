@@ -41,6 +41,7 @@ const MaskedDatePicker = ({
   name,
   disabled,
   className = "border-none outline-none",
+  placeholder
 }) => {
   const [inputValue, setInputValue] = useState(date ? formatDate(date) : "");
   const [openCalendar, setOpenCalendar] = useState(false);
@@ -50,7 +51,6 @@ const MaskedDatePicker = ({
   today.setHours(0, 0, 0, 0);
 
   useEffect(() => {
-    // eslint-disable-next-line valid-typeof
     if (typeof date === "string") {
       setDateValue(convertStringIntoDateObject(date));
     }
@@ -110,7 +110,7 @@ const MaskedDatePicker = ({
         )}/${String(today.getFullYear())}`;
         setInputValue(input);
         setDateValue(convertStringIntoDateObject(input));
-      } else if ( value.length == 5 && String(value).substring(0,2) < 31 && String(value).substring(0,2) && String(value).substring(3) < 31 && String.substring(3) ) {
+      } else if ( value.length == 5 && String(value).substring(0,2) < 31 && String(value).substring(0,2) && String(value).substring(3) < 31 && String(value).substring(3) ) {
         let input = `${value.substring(0, 2)}/${String(value).substring(3).padStart(
           2,
           "0"
@@ -127,7 +127,7 @@ const MaskedDatePicker = ({
 
   return (
     <div
-      className={`flex items-center gap-3 border border-gray-300 bg-white rounded-md px-4 mb-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 py-1.5 justify-between`}
+      className={`flex items-center gap-3 border border-gray-300 bg-white rounded-md px-4 mb-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 py-1.5 justify-between w-[20vw]`}
     >
       <DatePicker
         selected={dateValue}
@@ -140,9 +140,9 @@ const MaskedDatePicker = ({
             <input
               id="datepicker"
               type="text"
-              className={className}
+              className={`border-none outline-none ${className}`}
               name={name}
-              placeholder="__/___/____"
+              placeholder={`__/___/____ ${placeholder}`}
               value={inputValue}
               disabled={disabled}
               onChange={handleInputChange}
