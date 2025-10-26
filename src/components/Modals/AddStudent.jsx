@@ -13,6 +13,13 @@ import { FaGraduationCap, FaMapMarkerAlt, FaRupeeSign } from "react-icons/fa";
 import { Select } from "../commonFunctions/CommonSelectFxn";
 import MaskedDatePicker from "../commonFunctions/MaskedDatePicker";
 
+// --- UI/UX Brand Colors ---
+const brand = "#2F7FFF";
+const brandGradient = "bg-gradient-to-r from-blue-600 to-purple-600";
+const accentGradient = "bg-gradient-to-br from-blue-500 to-purple-600";
+const accentGreen = "bg-gradient-to-br from-green-500 to-teal-600";
+const accentOrange = "bg-gradient-to-br from-orange-500 to-red-600";
+
 const InputField = React.memo(
   ({
     icon: Icon,
@@ -81,9 +88,6 @@ const InputField = React.memo(
                 name={name}
                 className={className}
                 placeholder={placeholder}
-                // className={`w-full outline-none text-sm bg-transparent ${
-                //   disabled ? "text-gray-400" : ""
-                // }`}
               />
             )}
           </>
@@ -95,6 +99,7 @@ const InputField = React.memo(
     </div>
   )
 );
+
 const AddStudent = ({ isOpen, setIsOpen }) => {
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -126,11 +131,9 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
     mode: "onBlur",
   });
 
-  const watchValues = watch();
   const dateOfBirth = watch("dateOfBirth");
   const admissionDate = watch("admissionDate");
 
-  // Static data moved outside component to prevent re-creation
   const standardClassOptions = [
     { label: "7th Standard", value: 7 },
     { label: "8th Standard", value: 8 },
@@ -152,7 +155,6 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
     { label: "Karnataka", value: "karnataka" },
   ];
 
-  // Validation rules for each step
   const stepValidationFields = {
     1: ["firstName", "lastName", "parentEmail", "dateOfBirth", "admissionDate"],
     2: ["standard", "board", "school"],
@@ -162,12 +164,8 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
   const nextStep = useCallback(async () => {
     const fieldsToValidate = stepValidationFields[currentStep];
     const isValid = await trigger(fieldsToValidate);
-
-    if (isValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, 3));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (isValid) setCurrentStep((prev) => Math.min(prev + 1, 3));
+  }, [currentStep, trigger]);
 
   const prevStep = useCallback(() => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -189,339 +187,43 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
     reset();
   }, [setIsOpen, reset]);
 
-  // Optimized input component
-
-  // Optimized select component
-  // const Select = React.memo(({
-  //   options,
-  //   placeholder,
-  //   name,
-  //   rules = {},
-  //   icon: Icon,
-  //   disabled = false
-  // }) => (
-  //   <div className="space-y-1">
-  //     <Controller
-  //       name={name}
-  //       control={control}
-  //       rules={rules}
-  //       render={({ field }) => (
-  //         <div className={`flex items-center gap-3 border-2 ${
-  //           errors[name] ? 'border-red-300' : 'border-gray-200'
-  //         } bg-white rounded-xl px-4 py-3 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 hover:border-gray-300 ${
-  //           disabled ? 'bg-gray-50' : ''
-  //         }`}>
-  //           <Icon className={`text-lg flex-shrink-0 ${
-  //             disabled ? 'text-gray-300' : errors[name] ? 'text-red-400' : 'text-gray-400'
-  //           }`} />
-  //           <Select
-  //           control={control}
-  //           name={name}
-  //             options={options}
-  //             placeholder={placeholder}
-  //             value={field.value}
-  //             onChange={field.onChange}
-  //             isDisabled={disabled}
-  //           />
-  //         </div>
-  //       )}
-  //     />
-  //     {errors[name] && (
-  //       <p className="text-red-500 text-xs mt-1 ml-1">{errors[name].message}</p>
-  //     )}
-  //   </div>
-  // ));
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8 rounded-2xl">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <FaGraduationCap className="text-white text-2xl" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800">
-                Personal Information
-              </h3>
-              <p className="text-gray-500 text-sm mt-1">
-                Let's start with basic details
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <InputField
-                icon={IoPersonSharp}
-                placeholder="First Name"
-                name="firstName"
-                className="w-50"
-                rules={{
-                  required: "First name is required",
-                  minLength: {
-                    value: 2,
-                    message: "First name must be at least 2 characters",
-                  },
-                }}
-                control={control}
-                errors={errors}
-              />
-              <InputField
-                icon={IoPersonSharp}
-                placeholder="Middle Name"
-                name="middleName"
-                control={control}
-                errors={errors}
-              />
-            </div>
-
-            <InputField
-              icon={IoPersonSharp}
-              placeholder="Last Name"
-              name="lastName"
-              rules={{
-                required: "Last name is required",
-                minLength: {
-                  value: 2,
-                  message: "Last name must be at least 2 characters",
-                },
-              }}
-              control={control}
-              errors={errors}
-            />
-
-            <InputField
-              icon={MdEmail}
-              type="email"
-              placeholder="Parent / Student Email"
-              name="parentEmail"
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                },
-              }}
-              control={control}
-              errors={errors}
-            />
-            <div className="flex gap-2 justify-center">
-              <InputField
-                icon={IoCalendarSharp}
-                type="date"
-                placeholder="Date of Birth"
-                name="dateOfBirth"
-                setDate={setValue}
-                date={dateOfBirth}
-                className={'w-60'}
-                rules={{ required: "Date of birth is required" }}
-                CustomComponent={MaskedDatePicker}
-                control={control}
-                errors={errors}
-              />
-              <InputField
-                icon={IoCalendarSharp}
-                type="date"
-                placeholder="Admission Date"
-                name="admissionDate"
-                setDate={setValue}
-                date={admissionDate}
-                rules={{ required: "Admission Date is required" }}
-                CustomComponent={MaskedDatePicker}
-                control={control}
-                errors={errors}
-              />
-            </div>
-          </div>
-        );
-
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <IoSchoolSharp className="text-white text-2xl" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800">
-                Academic Details
-              </h3>
-              <p className="text-gray-500 text-sm mt-1">
-                Educational information
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <Select
-                errors={errors}
-                control={control}
-                icon={MdClass}
-                options={standardClassOptions}
-                placeholder="Select Class/Standard"
-                name="standard"
-                rules={{ required: "Please select a standard" }}
-              />
-              <Select
-                errors={errors}
-                control={control}
-                icon={MdAccountBalance}
-                options={boardOptions}
-                placeholder="Select Board"
-                name="board"
-                rules={{ required: "Please select a board" }}
-              />
-            </div>
-
-            <InputField
-              icon={IoSchoolSharp}
-              placeholder="School Name"
-              name="school"
-              rules={{
-                required: "School name is required",
-                minLength: {
-                  value: 3,
-                  message: "School name must be at least 3 characters",
-                },
-              }}
-              control={control}
-              errors={errors}
-            />
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <InputField
-                icon={FaRupeeSign}
-                placeholder="Monthly Fees"
-                name="fees"
-                disabled
-                control={control}
-                errors={errors}
-              />
-              <InputField
-                icon={IoCalendarSharp}
-                placeholder="Tenure (Auto-calculated)"
-                name="tenure"
-                disabled
-                control={control}
-                errors={errors}
-              />
-            </div>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <IoLocationSharp className="text-white text-2xl" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800">
-                Contact Information
-              </h3>
-              <p className="text-gray-500 text-sm mt-1">
-                Where can we reach you?
-              </p>
-            </div>
-
-            <InputField
-              icon={FaMapMarkerAlt}
-              placeholder="Full Address"
-              name="address"
-              rules={{
-                required: "Address is required",
-                minLength: {
-                  value: 10,
-                  message: "Address must be at least 10 characters",
-                },
-              }}
-              control={control}
-              errors={errors}
-            />
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <InputField
-                icon={IoLocationSharp}
-                placeholder="City"
-                name="city"
-                rules={{
-                  required: "City is required",
-                  minLength: {
-                    value: 2,
-                    message: "City must be at least 2 characters",
-                  },
-                }}
-                control={control}
-                errors={errors}
-              />
-              <Select
-                errors={errors}
-                control={control}
-                icon={FaMapMarkerAlt}
-                options={stateOptions}
-                placeholder="Select State"
-                name="state"
-                rules={{ required: "Please select a state" }}
-              />
-            </div>
-
-            <InputField
-              icon={IoCallSharp}
-              type="tel"
-              placeholder="Mobile Number"
-              name="phoneNumber"
-              rules={{
-                required: "Phone number is required",
-                pattern: {
-                  value: /^[6-9]\d{9}$/,
-                  message: "Invalid phone number",
-                },
-              }}
-              prefix="+91"
-              control={control}
-              errors={errors}
-            />
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
   const steps = [1, 2, 3];
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl transform transition-all duration-300 scale-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-blue-100">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-100 p-6 rounded-t-2xl">
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-8 pt-8 pb-4 rounded-t-3xl">
           <div className="flex items-center justify-between">
-            <div className="flex gap-2 justify-between items-center">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Add New Student
-              </h2>
-              <p className="text-gray-500 text-sm mt-1">
-                Step {currentStep} of 3
-              </p>
+            <div className="flex gap-3 items-center">
+              <div className={`w-12 h-12 ${brandGradient} rounded-full flex items-center justify-center shadow-lg`}>
+                <FaGraduationCap className="text-white text-2xl" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-[#2F7FFF] tracking-tight">Add New Student</h2>
+                <p className="text-gray-400 text-xs mt-1 font-medium">Step {currentStep} of 3</p>
+              </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+              className="p-2 hover:bg-blue-50 rounded-full transition-colors duration-200"
+              aria-label="Close"
             >
-              <MdClose className="text-gray-500 text-xl" />
+              <MdClose className="text-blue-400 text-2xl" />
             </button>
           </div>
-
           {/* Progress Bar */}
-          <div className="mt-6">
+          <div className="mt-6 px-2">
             <div className="flex items-center">
               {steps.map((step) => (
                 <React.Fragment key={step}>
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                       step <= currentStep
-                        ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md"
-                        : "bg-gray-200 text-gray-500"
+                        ? `${brandGradient} text-white shadow-md`
+                        : "bg-gray-200 text-gray-400"
                     }`}
                   >
                     {step}
@@ -530,7 +232,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                     <div
                       className={`flex-1 h-2 mx-2 rounded-full transition-all duration-300 ${
                         step < currentStep
-                          ? "bg-gradient-to-r from-blue-500 to-purple-600"
+                          ? brandGradient
                           : "bg-gray-200"
                       }`}
                     />
@@ -542,8 +244,236 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6">
-          {renderStep()}
+        <form onSubmit={handleSubmit(onSubmit)} className="px-8 py-6">
+          {/* Step Content */}
+          <div className="mb-6">
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className={`w-14 h-14 ${accentGradient} rounded-full flex items-center justify-center shadow-lg`}>
+                    <FaGraduationCap className="text-white text-2xl" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Personal Information</h3>
+                    <p className="text-gray-400 text-xs mt-1">Let's start with basic details</p>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <InputField
+                    icon={IoPersonSharp}
+                    placeholder="First Name"
+                    name="firstName"
+                    className="w-50"
+                    rules={{
+                      required: "First name is required",
+                      minLength: {
+                        value: 2,
+                        message: "First name must be at least 2 characters",
+                      },
+                    }}
+                    control={control}
+                    errors={errors}
+                  />
+                  <InputField
+                    icon={IoPersonSharp}
+                    placeholder="Middle Name"
+                    name="middleName"
+                    control={control}
+                    errors={errors}
+                  />
+                </div>
+                <InputField
+                  icon={IoPersonSharp}
+                  placeholder="Last Name"
+                  name="lastName"
+                  rules={{
+                    required: "Last name is required",
+                    minLength: {
+                      value: 2,
+                      message: "Last name must be at least 2 characters",
+                    },
+                  }}
+                  control={control}
+                  errors={errors}
+                />
+                <InputField
+                  icon={MdEmail}
+                  type="email"
+                  placeholder="Parent / Student Email"
+                  name="parentEmail"
+                  rules={{
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  }}
+                  control={control}
+                  errors={errors}
+                />
+                <div className="flex gap-2 justify-center">
+                  <InputField
+                    icon={IoCalendarSharp}
+                    type="date"
+                    placeholder="Date of Birth"
+                    name="dateOfBirth"
+                    setDate={setValue}
+                    date={dateOfBirth}
+                    className={'w-60'}
+                    rules={{ required: "Date of birth is required" }}
+                    CustomComponent={MaskedDatePicker}
+                    control={control}
+                    errors={errors}
+                  />
+                  <InputField
+                    icon={IoCalendarSharp}
+                    type="date"
+                    placeholder="Admission Date"
+                    name="admissionDate"
+                    setDate={setValue}
+                    date={admissionDate}
+                    rules={{ required: "Admission Date is required" }}
+                    CustomComponent={MaskedDatePicker}
+                    control={control}
+                    errors={errors}
+                  />
+                </div>
+              </div>
+            )}
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className={`w-14 h-14 ${accentGreen} rounded-full flex items-center justify-center shadow-lg`}>
+                    <IoSchoolSharp className="text-white text-2xl" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Academic Details</h3>
+                    <p className="text-gray-400 text-xs mt-1">Educational information</p>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Select
+                    errors={errors}
+                    control={control}
+                    icon={MdClass}
+                    options={standardClassOptions}
+                    placeholder="Select Class/Standard"
+                    name="standard"
+                    rules={{ required: "Please select a standard" }}
+                  />
+                  <Select
+                    errors={errors}
+                    control={control}
+                    icon={MdAccountBalance}
+                    options={boardOptions}
+                    placeholder="Select Board"
+                    name="board"
+                    rules={{ required: "Please select a board" }}
+                  />
+                </div>
+                <InputField
+                  icon={IoSchoolSharp}
+                  placeholder="School Name"
+                  name="school"
+                  rules={{
+                    required: "School name is required",
+                    minLength: {
+                      value: 3,
+                      message: "School name must be at least 3 characters",
+                    },
+                  }}
+                  control={control}
+                  errors={errors}
+                />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <InputField
+                    icon={FaRupeeSign}
+                    placeholder="Monthly Fees"
+                    name="fees"
+                    disabled
+                    control={control}
+                    errors={errors}
+                  />
+                  <InputField
+                    icon={IoCalendarSharp}
+                    placeholder="Tenure (Auto-calculated)"
+                    name="tenure"
+                    disabled
+                    control={control}
+                    errors={errors}
+                  />
+                </div>
+              </div>
+            )}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className={`w-14 h-14 ${accentOrange} rounded-full flex items-center justify-center shadow-lg`}>
+                    <IoLocationSharp className="text-white text-2xl" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Contact Information</h3>
+                    <p className="text-gray-400 text-xs mt-1">Where can we reach you?</p>
+                  </div>
+                </div>
+                <InputField
+                  icon={FaMapMarkerAlt}
+                  placeholder="Full Address"
+                  name="address"
+                  rules={{
+                    required: "Address is required",
+                    minLength: {
+                      value: 10,
+                      message: "Address must be at least 10 characters",
+                    },
+                  }}
+                  control={control}
+                  errors={errors}
+                />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <InputField
+                    icon={IoLocationSharp}
+                    placeholder="City"
+                    name="city"
+                    rules={{
+                      required: "City is required",
+                      minLength: {
+                        value: 2,
+                        message: "City must be at least 2 characters",
+                      },
+                    }}
+                    control={control}
+                    errors={errors}
+                  />
+                  <Select
+                    errors={errors}
+                    control={control}
+                    icon={FaMapMarkerAlt}
+                    options={stateOptions}
+                    placeholder="Select State"
+                    name="state"
+                    rules={{ required: "Please select a state" }}
+                  />
+                </div>
+                <InputField
+                  icon={IoCallSharp}
+                  type="tel"
+                  placeholder="Mobile Number"
+                  name="phoneNumber"
+                  rules={{
+                    required: "Phone number is required",
+                    pattern: {
+                      value: /^[6-9]\d{9}$/,
+                      message: "Invalid phone number",
+                    },
+                  }}
+                  prefix="+91"
+                  control={control}
+                  errors={errors}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Navigation Buttons */}
           <div className="flex justify-between pt-4 mt-8 border-t border-gray-100">
@@ -572,16 +502,14 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
               </svg>
               Previous
             </button>
-
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 hover:shadow-md transition-all duration-200"
+                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-blue-50 hover:text-[#2F7FFF] hover:shadow transition-all duration-200"
               >
                 Cancel
               </button>
-
               {currentStep < 3 ? (
                 <button
                   type="button"
