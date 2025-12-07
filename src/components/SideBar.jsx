@@ -1,17 +1,17 @@
 import React, { useState, useMemo } from "react";
 import {
   Home,
-  User,
+  Users,
+  Calendar,
+  BookOpen,
+  FileText,
+  Info,
+  DollarSign,
   Settings,
-  Bell,
-  Search,
+  LogOut,
   ChevronLeft,
   ChevronRight,
-  BarChart3,
-  Mail,
-  Calendar,
-  FileText,
-  LogOut,
+  Search,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -260,7 +260,6 @@ const Sidebar = ({ logo, onLogout }) => {
                 Logout
               </span>
             )}
-
             {/* Tooltip (visible when sidebar is collapsed) */}
             {!isOpen && (
               <div className="absolute left-full ml-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
