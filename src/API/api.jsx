@@ -1,4 +1,4 @@
-const BACKEND_ROUTE = 'http://localhost:8002/api/';
+const BACKEND_ROUTE = 'http://localhost:5000/api/';
 
 export const API = {
     Register : BACKEND_ROUTE + 'users/register',
@@ -9,4 +9,5 @@ export const API = {
     ExportStudent : BACKEND_ROUTE + 'users/studentsexport',
     ImportStudent  : BACKEND_ROUTE + 'users/import-students',
     StudentById: (id) => BACKEND_ROUTE + `users/getStudentById/${id}`,
+    Fees : BACKEND_ROUTE + 'fees/getMonthlyFeesSummary'
 }

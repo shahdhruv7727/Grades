@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { SendGETRequest } from '../services/SendGETRequest';
-import { API } from '../API/API';
+import { API } from '../API/api';
 
 const StudentList = () => {
   const [filters, setFilters] = useState({});

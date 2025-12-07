@@ -9,21 +9,21 @@ import { API } from "../API/API";
 import { SendGETRequest } from "../services/SendGETRequest";
 import axios from "axios";
 import {
+  FaEdit,
+  FaEnvelope,
+  FaEye,
+  FaGraduationCap,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaPlus,
+  FaSchool,
   FaSearch,
   FaIcons,
   FaSort,
-  FaSortUp,
   FaSortDown,
-  FaEye,
-  FaEdit,
+  FaSortUp,
   FaTrash,
-  FaPlus,
-  FaGraduationCap,
-  FaPhone,
-  FaEnvelope,
-  FaMapMarkerAlt,
-  FaUserGraduate,
-  FaSchool,
+  FaUserGraduate
   FaTimes,
 } from "react-icons/fa";
 
@@ -70,6 +70,8 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
   );
 };
 import { FaFileExport, FaFileImport } from "react-icons/fa6";
+import { MdFilterList, MdGridView, MdKeyboardArrowDown, MdViewList } from "react-icons/md";
+import AddStudent from "../components/Modals/AddStudent";
 
 const StudentTable = () => {
   const [viewMode, setViewMode] = useState("table");

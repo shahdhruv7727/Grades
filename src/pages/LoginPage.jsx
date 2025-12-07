@@ -21,7 +21,9 @@ const LoginPage = () => {
       password: form.password?.value,
     };
     const response = await mutate({ url: API.Login, input: userData });
-    console.log(response);
+    console.log(response)
+    localStorage.setItem("token", response?.token);
+    localStorage.setItem("user", JSON.stringify(response?.user));
   };
 
   const inputWrapper =

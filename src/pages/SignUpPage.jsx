@@ -4,7 +4,7 @@ import { BsFillKeyFill } from "react-icons/bs";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import useMutateHook from "../utils/useMutateHook";
-import { API } from "../API/API";
+import { API } from "../API/api";
 import { handleEnterKeyDown } from "../components/commonFunctions/HandleEnterInput";
 
 const SignUpPage = () => {
@@ -14,9 +14,6 @@ const SignUpPage = () => {
     "Register Successfull",
     "Register Failed! Please try again"
   );
-  const API = {
-    Register: "/api/register",
-  };
 
   const options = [
     { value: "teacher", label: "Teacher" },
