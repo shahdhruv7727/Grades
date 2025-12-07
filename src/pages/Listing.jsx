@@ -1,34 +1,31 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useMemo, useEffect } from "react";
-import StudentExport from "../components/Modals/Export";
+import { MdKeyboardArrowDown, MdGridView, MdViewList, MdFilterList } from "react-icons/md";
+// import StudentExport from "../components/Modals/Export";
 import StudentImport from "../components/Modals/Import";
 import AddStudent from "../components/Modals/AddStudent";
 
 import { API } from "../API/API";
 import { SendGETRequest } from "../services/SendGETRequest";
+import axios from "axios";
 import {
   FaSearch,
   FaIcons,
-  FaFilter,
   FaSort,
   FaSortUp,
   FaSortDown,
   FaEye,
   FaEdit,
   FaTrash,
-  FaDownload,
   FaPlus,
   FaGraduationCap,
   FaPhone,
   FaEnvelope,
   FaMapMarkerAlt,
-  FaCalendarAlt,
   FaUserGraduate,
   FaSchool,
   FaTimes,
 } from "react-icons/fa";
-import { MdGridView, MdViewList, MdFilterList } from "react-icons/md";
-import { IoPersonSharp } from "react-icons/io5";
 
 // Modal Component
 const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
@@ -72,9 +69,10 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
     </div>
   );
 };
+import { FaFileExport, FaFileImport } from "react-icons/fa6";
 
 const StudentTable = () => {
-  const [viewMode, setViewMode] = useState("table"); // 'table' or 'grid'
+  const [viewMode, setViewMode] = useState("table");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
@@ -218,19 +216,16 @@ const StudentTable = () => {
         student.school.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesClass = filterClass === "" || student.class === filterClass;
       const matchesBoard = filterBoard === "" || student.board === filterBoard;
-
       return matchesSearch && matchesClass && matchesBoard;
     });
 
     filtered.sort((a, b) => {
       let aValue = a[sortField];
       let bValue = b[sortField];
-
       if (sortField === "fees") {
         aValue = parseInt(aValue.replace(/[₹,]/g, ""));
         bValue = parseInt(bValue.replace(/[₹,]/g, ""));
       }
-
       if (sortDirection === "asc") {
         return aValue > bValue ? 1 : -1;
       } else {
@@ -278,106 +273,104 @@ const StudentTable = () => {
   const getSortIcon = (field) => {
     if (sortField !== field) return <FaSort className="text-gray-400" />;
     return sortDirection === "asc" ? (
-      <FaSortUp className="text-blue-500" />
+      <FaSortUp style={{ color: brand }} />
     ) : (
-      <FaSortDown className="text-blue-500" />
+      <FaSortDown style={{ color: brand }} />
     );
   };
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";
     if (status === "Active") {
-      return `${baseClasses} bg-green-100 text-green-800`;
+      return `${baseClasses} bg-green-50 text-green-700 border border-green-200`;
     } else {
-      return `${baseClasses} bg-red-100 text-red-800`;
+      return `${baseClasses} bg-red-50 text-red-700 border border-red-200`;
     }
   };
 
   const ActionButton = ({ icon: Icon, color, onClick, tooltip }) => (
     <button
       onClick={onClick}
-      className={`p-2 rounded-lg ${color} transition-all duration-200 hover:scale-110 group relative`}
+      className={`p-2 rounded-lg ${color} transition-all duration-200 hover:scale-105 group relative`}
       title={tooltip}
+      style={{ outline: "none" }}
     >
       <Icon className="w-4 h-4" />
-      <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+      <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
         {tooltip}
       </span>
     </button>
   );
 
-  const StudentCard = ({ student }) => (
-    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
+  // --- Mobile Optimized List ---
+  const MobileList = ({ items }) => (
+    <div className="block md:hidden bg-white rounded-xl shadow-md">
+      {items.map((student, i) => (
+        <div
+          key={student.id}
+          className="p-3 flex items-center justify-between gap-2"
+          style={{
+            borderBottom: i === items.length - 1 ? "none" : `1px solid ${brandLight}`,
+          }}
+        >
+          {/* Avatar and status dot */}
+          <div className="flex items-center gap-2 min-w-0">
             <div className="relative">
               <img
                 src={student.avatar}
                 alt={student.name}
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-500/20"
+                className="w-9 h-9 rounded-full object-cover"
               />
-              <div
-                className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
+              <span
+                className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
                   student.status === "Active" ? "bg-green-500" : "bg-red-500"
                 }`}
-              ></div>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-800">{student.name}</h3>
-              <p className="text-sm text-gray-500">
-                {student.class} • {student.board}
-              </p>
+              ></span>
             </div>
           </div>
-          <div className={getStatusBadge(student.status)}>{student.status}</div>
-        </div>
-
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <FaSchool className="text-blue-500" />
-            {student.school}
+          {/* Main info */}
+          <div className="flex-1 min-w-0 ml-2">
+            <div className="text-xs font-semibold text-gray-900 truncate">
+              {student.name}
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-gray-500 truncate">
+              <FaSchool className="inline mr-1 text-blue-400" />
+              {student.class}, {student.board}
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <FaEnvelope className="text-green-500" />
-            {student.email}
+          {/* Fees */}
+          <div className="flex flex-col items-end mr-2">
+            <span className="text-xs font-bold" style={{ color: brand }}>
+              {student.fees}
+            </span>
+            <span className="text-[10px] text-gray-400">Monthly</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <FaPhone className="text-purple-500" />
-            {student.phone}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <FaMapMarkerAlt className="text-red-500" />
-            {student.address}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="text-lg font-semibold text-blue-600">
-            {student.fees} Fee
-          </div>
+          {/* Actions */}
           <div className="flex gap-1">
-            <ActionButton
-              icon={FaEye}
-              color="bg-blue-100 text-blue-600 hover:bg-blue-200"
+            <button
               onClick={() => console.log("View", student.id)}
-              tooltip="View Details"
-            />
-            <ActionButton
-              icon={FaEdit}
-              color="bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
+              className="p-1 rounded bg-blue-50 text-blue-700"
+              aria-label="view"
+            >
+              <FaEye className="w-3 h-3" />
+            </button>
+            <button
               onClick={() => console.log("Edit", student.id)}
-              tooltip="Edit Student"
-            />
-            <ActionButton
-              icon={FaTrash}
-              color="bg-red-100 text-red-600 hover:bg-red-200"
+              className="p-1 rounded bg-yellow-50 text-yellow-700"
+              aria-label="edit"
+            >
+              <FaEdit className="w-3 h-3" />
+            </button>
+            <button
               onClick={() => console.log("Delete", student.id)}
-              tooltip="Delete Student"
-            />
+              className="p-1 rounded bg-red-50 text-red-700"
+              aria-label="delete"
+            >
+              <FaTrash className="w-3 h-3" />
+            </button>
           </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 
@@ -407,20 +400,30 @@ const StudentTable = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen p-6">
+    <div
+      className="min-h-screen py-8 px-4 sm:px-6 lg:px-8"
+     
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         {openStudentForm && (
           <AddStudent isOpen={openStudentForm} setIsOpen={setOpenStudentForm} />
         )}
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1
+                className="text-2xl sm:text-3xl font-bold"
+                style={{
+                  color: brand,
+                  letterSpacing: "-0.5px",
+                  lineHeight: 1.1,
+                }}
+              >
                 Students Management
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-500 mt-1 text-sm">
                 Manage and track all your students
               </p>
             </div>
@@ -447,68 +450,102 @@ const StudentTable = () => {
                 </div>
               </button>
               <button
-                className="group relative w-max overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow transition font-medium"
+                style={{
+                  background: brand,
+                  color: "#fff",
+                  border: "none",
+                }}
                 onClick={() => setOpenStudentForm((prev) => !prev)}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative flex items-center gap-2 h-[17px]">
-                  <FaPlus className="text-sm" />
-                  Add Student
-                </div>
+                <FaPlus className="w-4 h-4" />
+                Add Student
               </button>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+        <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
             {/* Search */}
             <div className="relative flex-1">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaSearch
+                className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                style={{ color: brand }}
+              />
               <input
                 type="text"
                 placeholder="Search students..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 font-medium text-base tracking-tight placeholder-gray-400"
+                style={{
+                  borderColor: brandLight,
+                  boxShadow: "none",
+                  fontSize: "1rem",
+                  letterSpacing: "-0.01em",
+                }}
               />
             </div>
-
             {/* Filters */}
-            <div className="flex gap-3">
-              <select
-                value={filterClass}
-                onChange={(e) => setFilterClass(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Classes</option>
-                <option value="7th">7th</option>
-                <option value="8th">8th</option>
-                <option value="9th">9th</option>
-                <option value="10th">10th</option>
-              </select>
-
-              <select
-                value={filterBoard}
-                onChange={(e) => setFilterBoard(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Boards</option>
-                <option value="CBSE">CBSE</option>
-                <option value="ICSE">ICSE</option>
-                <option value="State Board">State Board</option>
-                <option value="IB">IB</option>
-              </select>
-
+            <div className="flex flex-wrap gap-2">
+              <div className="relative">
+                <select
+                  value={filterClass}
+                  onChange={(e) => setFilterClass(e.target.value)}
+                  className="appearance-none px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 font-medium text-base tracking-tight pr-8"
+                  style={{
+                    borderColor: brandLight,
+                    fontSize: "1rem",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  <option value="">All Classes</option>
+                  <option value="7th">7th</option>
+                  <option value="8th">8th</option>
+                  <option value="9th">9th</option>
+                  <option value="10th">10th</option>
+                </select>
+                <span className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <MdKeyboardArrowDown className="w-5 h-5" />
+                </span>
+              </div>
+              <div className="relative">
+                <select
+                  value={filterBoard}
+                  onChange={(e) => setFilterBoard(e.target.value)}
+                  className="appearance-none px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 font-medium text-base tracking-tight pr-8"
+                  style={{
+                    borderColor: brandLight,
+                    fontSize: "1rem",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  <option value="">All Boards</option>
+                  <option value="CBSE">CBSE</option>
+                  <option value="ICSE">ICSE</option>
+                  <option value="State Board">State Board</option>
+                  <option value="IB">IB</option>
+                </select>
+                <span className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <MdKeyboardArrowDown className="w-5 h-5" />
+                </span>
+              </div>
               {/* View Mode Toggle */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
+              <div className="flex rounded-lg p-1" style={{ background: brandLight }}>
                 <button
                   onClick={() => setViewMode("table")}
                   className={`p-2 rounded-md transition-all duration-200 ${
                     viewMode === "table"
-                      ? "bg-white shadow-sm text-blue-600"
+                      ? "bg-white shadow-sm"
                       : "text-gray-600 hover:text-gray-800"
                   }`}
+                  style={
+                    viewMode === "table"
+                      ? { color: brand, border: `1px solid ${brand}` }
+                      : {}
+                  }
+                  aria-label="Table View"
                 >
                   <MdViewList className="w-5 h-5" />
                 </button>
@@ -516,9 +553,15 @@ const StudentTable = () => {
                   onClick={() => setViewMode("grid")}
                   className={`p-2 rounded-md transition-all duration-200 ${
                     viewMode === "grid"
-                      ? "bg-white shadow-sm text-blue-600"
+                      ? "bg-white shadow-sm"
                       : "text-gray-600 hover:text-gray-800"
                   }`}
+                  style={
+                    viewMode === "grid"
+                      ? { color: brand, border: `1px solid ${brand}` }
+                      : {}
+                  }
+                  aria-label="Grid View"
                 >
                   <MdGridView className="w-5 h-5" />
                 </button>
@@ -527,46 +570,58 @@ const StudentTable = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm">Total Students</p>
-                  <p className="text-2xl font-bold">{students.length}</p>
-                </div>
-                <FaUserGraduate className="w-8 h-8 text-blue-200" />
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-6">
+            <div
+              className="p-3 rounded-lg flex flex-col items-center justify-center"
+              style={{
+                background: brand,
+                color: "#fff",
+                minWidth: 0,
+              }}
+            >
+              <FaUserGraduate className="w-7 h-7 mb-1" />
+              <p className="text-[11px] opacity-80 font-medium">Total</p>
+              <p className="text-base font-bold">{students.length}</p>
             </div>
-            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm">Active Students</p>
-                  <p className="text-2xl font-bold">
-                    {students.filter((s) => s.status === "Active").length}
-                  </p>
-                </div>
-                <FaGraduationCap className="w-8 h-8 text-green-200" />
-              </div>
+            <div
+              className="p-3 rounded-lg flex flex-col items-center justify-center"
+              style={{
+                background: "#E6F9F0",
+                color: "#00875A",
+                minWidth: 0,
+              }}
+            >
+              <FaGraduationCap className="w-7 h-7 mb-1" />
+              <p className="text-[11px] opacity-80 font-medium">Active</p>
+              <p className="text-base font-bold">
+                {students.filter((s) => s.status === "Active").length}
+              </p>
             </div>
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm">Classes</p>
-                  <p className="text-2xl font-bold">4</p>
-                </div>
-                <FaSchool className="w-8 h-8 text-purple-200" />
-              </div>
+            <div
+              className="p-3 rounded-lg flex flex-col items-center justify-center"
+              style={{
+                background: "#F3F0FF",
+                color: "#6C47FF",
+                minWidth: 0,
+              }}
+            >
+              <FaSchool className="w-7 h-7 mb-1" />
+              <p className="text-[11px] opacity-80 font-medium">Classes</p>
+              <p className="text-base font-bold">4</p>
             </div>
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-orange-100 text-sm">Filtered Results</p>
-                  <p className="text-2xl font-bold">
-                    {filteredAndSortedStudents.length}
-                  </p>
-                </div>
-                <MdFilterList className="w-8 h-8 text-orange-200" />
-              </div>
+            <div
+              className="p-3 rounded-lg flex flex-col items-center justify-center"
+              style={{
+                background: "#FFF7E6",
+                color: "#B26A00",
+                minWidth: 0,
+              }}
+            >
+              <MdFilterList className="w-7 h-7 mb-1" />
+              <p className="text-[11px] opacity-80 font-medium">Filtered</p>
+              <p className="text-base font-bold">
+                {filteredAndSortedStudents.length}
+              </p>
             </div>
           </div>
         </div>
@@ -746,3 +801,4 @@ const StudentTable = () => {
 };
 
 export default StudentTable;
+
