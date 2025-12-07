@@ -12,8 +12,16 @@ import { MdEmail, MdClass, MdAccountBalance, MdClose } from "react-icons/md";
 import { FaGraduationCap, FaMapMarkerAlt, FaRupeeSign } from "react-icons/fa";
 import { Select } from "../commonFunctions/CommonSelectFxn";
 import MaskedDatePicker from "../commonFunctions/MaskedDatePicker";
+import { API } from "../../API/API";
+import useMutateHook from "../../utils/useMutateHook";
+
 const AddStudent = ({ isOpen, setIsOpen }) => {
   const [currentStep, setCurrentStep] = useState(1);
+ const { mutate, isLoading } =  useMutateHook(
+    "",
+    "Student added successfully!",
+    "Failed to add student!"
+  );
 
   const {
     control,
@@ -25,19 +33,21 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
     watch,
   } = useForm({
     defaultValues: {
-      firstName: "",
-      middleName: "",
-      lastName: "",
+      firstname: "",
+      middlename: "",
+      lastname: "",
       parentEmail: "",
       standard: "",
       board: "",
       school: "",
-      fees: "",
+      fees: 5000,
       address: "",
       city: "",
       state: "",
       phoneNumber: "",
       dateOfBirth: "",
+      admissionDate: new Date().toISOString().split("T")[0],
+      mobilePhone1:"9832144431"
     },
     mode: "onBlur",
   });
@@ -68,7 +78,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
 
   // Validation rules for each step
   const stepValidationFields = {
-    1: ["firstName", "lastName", "parentEmail", "dateOfBirth"],
+    1: ["firstname", "lastname", "parentEmail", "dateOfBirth"],
     2: ["standard", "board", "school"],
     3: ["address", "city", "state", "phoneNumber"],
   };
@@ -87,9 +97,13 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   }, []);
 
-  const onSubmit = useCallback(
-    (data) => {
+  const onSubmit =  useCallback(
+   async (data) =>  {
       console.log("Form submitted:", data);
+      await mutate({
+        url: API.AddStudent,
+        input: data,
+      });
       setIsOpen(false);
       setCurrentStep(1);
       reset();
@@ -247,7 +261,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
               <InputField
                 icon={IoPersonSharp}
                 placeholder="First Name"
-                name="firstName"
+                name="firstname"
                 rules={{
                   required: "First name is required",
                   minLength: {
@@ -259,14 +273,14 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
               <InputField
                 icon={IoPersonSharp}
                 placeholder="Middle Name"
-                name="middleName"
+                name="middlename"
               />
             </div>
 
             <InputField
               icon={IoPersonSharp}
               placeholder="Last Name"
-              name="lastName"
+              name="lastname"
               rules={{
                 required: "Last name is required",
                 minLength: {
