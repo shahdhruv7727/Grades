@@ -17,7 +17,7 @@ import {
   FaUserGraduate
 } from "react-icons/fa";
 import { FaFileExport, FaFileImport } from "react-icons/fa6";
-import { MdFilterList, MdGridView, MdViewList } from "react-icons/md";
+import { MdFilterList, MdGridView, MdKeyboardArrowDown, MdViewList } from "react-icons/md";
 import AddStudent from "../components/Modals/AddStudent";
 
 const StudentTable = () => {
