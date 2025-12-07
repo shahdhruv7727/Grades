@@ -12,6 +12,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
+  BarChart3,
+  Mail,
+  User,
+  Bell,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
