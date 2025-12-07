@@ -8,6 +8,8 @@ import SideBarLayout from "../layout/SideBarLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import Loader from "../components/commonFunctions/Loader";
 import StudentTable from "../pages/Listing";
+import FeesFinances from "../pages/FeesAndFinances";
+import ClassesManagement from "../pages/ClassesManagament";
 // import StudentList from "../pages/RegistrationForm";
 
 const AppRoutes = () => {
@@ -39,6 +41,8 @@ const AppRoutes = () => {
       <Route path="/forgotpass" element={<ForgotPassPage />} />
       <Route path="/" element={<LoginPage />} />
       <Route path="/loader" element={<Loader />} />
+      <Route path="/fees" element={ <SideBarLayout insideComponent={<FeesFinances />}/>} />
+      <Route path="/classes" element={<SideBarLayout insideComponent={<ClassesManagement />} />}/>
       <Route path="*" element={
         <ProtectedRoute>
           <SideBarLayout insideComponent={<LandingPage/>} />

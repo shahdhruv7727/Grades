@@ -1,32 +1,24 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useMemo, useEffect } from "react";
-import { API } from "../API/API";
-import { SendGETRequest } from "../services/SendGETRequest";
-import axios from "axios";
+import { useMemo, useState } from "react";
 import {
-  FaSearch,
-  FaFilter,
-  FaSort,
-  FaSortUp,
-  FaSortDown,
-  FaEye,
   FaEdit,
-  FaTrash,
-  FaDownload,
-  FaPlus,
-  FaGraduationCap,
-  FaPhone,
   FaEnvelope,
+  FaEye,
+  FaGraduationCap,
   FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaUserGraduate,
+  FaPhone,
+  FaPlus,
   FaSchool,
-  FaIcons,
+  FaSearch,
+  FaSort,
+  FaSortDown,
+  FaSortUp,
+  FaTrash,
+  FaUserGraduate
 } from "react-icons/fa";
-import { MdGridView, MdViewList, MdFilterList } from "react-icons/md";
-import { IoPersonSharp } from "react-icons/io5";
+import { FaFileExport, FaFileImport } from "react-icons/fa6";
+import { MdFilterList, MdGridView, MdViewList } from "react-icons/md";
 import AddStudent from "../components/Modals/AddStudent";
-import { FaFileExport, FaFileImport  } from "react-icons/fa6";
 
 const StudentTable = () => {
   const [viewMode, setViewMode] = useState("table"); // 'table' or 'grid'
