@@ -11,6 +11,7 @@ import StudentTable from "../pages/Listing";
 import FeesFinances from "../pages/FeesAndFinances";
 import ClassesManagement from "../pages/ClassesManagament";
 import ClassesPage from "../pages/ClassesPage";
+import TeachersManagement from "../pages/TeachersPage";
 
 // 1) ADD THIS NEW IMPORT
 import ClassDetailsPage from "../pages/ClassDetailsPage"; // We will create this in the next step
@@ -68,6 +69,7 @@ const AppRoutes = () => {
         }
       />
 
+
       {/* Public Routes */}
       <Route path="/register" element={<SignUpPage />} />
       <Route path="/forgotpass" element={<ForgotPassPage />} />
@@ -75,7 +77,7 @@ const AppRoutes = () => {
       <Route path="/loader" element={<Loader />} />
       <Route path="/fees" element={ <SideBarLayout insideComponent={<FeesFinances />}/>} />
       <Route path="/classes" element={<SideBarLayout insideComponent={<ClassesManagement />} />}/>
-
+      <Route path="/teachers" element={<SideBarLayout insideComponent={<TeachersManagement />} />}/>
       <Route
         path="*"
         element={
@@ -97,6 +99,7 @@ const AppRoutes = () => {
         path="/wha"
         element={<SideBarLayout insideComponent={<StudentTable />} />}
       />
+     
     </Routes>
   );
 };

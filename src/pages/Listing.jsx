@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { MdKeyboardArrowDown, MdGridView, MdViewList, MdFilterList } from "react-icons/md";
-// import StudentExport from "../components/Modals/Export";
+import { FaFileExport, FaFileImport } from "react-icons/fa6";
 import StudentImport from "../components/Modals/Import";
+import StudentExport from "../components/Modals/Export";
 import AddStudent from "../components/Modals/AddStudent";
 
 import { API } from "../API/API";
@@ -23,9 +24,13 @@ import {
   FaSortDown,
   FaSortUp,
   FaTrash,
-  FaUserGraduate
+  FaUserGraduate,
   FaTimes,
+  FaDownload,
 } from "react-icons/fa";
+
+const brand = "#3B82F6";
+const brandLight = "#DBEAFE";
 
 // Modal Component
 const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
@@ -69,9 +74,6 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
     </div>
   );
 };
-import { FaFileExport, FaFileImport } from "react-icons/fa6";
-import { MdFilterList, MdGridView, MdKeyboardArrowDown, MdViewList } from "react-icons/md";
-import AddStudent from "../components/Modals/AddStudent";
 
 const StudentTable = () => {
   const [viewMode, setViewMode] = useState("table");
@@ -91,57 +93,59 @@ const StudentTable = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [viewStudent, setViewStudent] = useState(null);
+  const [editStudent, setEditStudent] = useState(null);
+  const [deleteStudent, setDeleteStudent] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const addModalWasOpen = useRef(false);
+
+  const fetchStudents = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await SendGETRequest(API.Students);
+      if (!response || !response.data || !Array.isArray(response.data.students)) {
+        setError("Invalid data format received");
+        return;
+      }
+
+      const transformed = response.data.students.map((student) => ({
+        id: student._id,
+        name: student.name,
+        class: student.standard,
+        board: student.board,
+        school: student.school,
+        email: student.parentEmail,
+        phone: student.mobilePhone1,
+        address: student.address,
+        dateOfBirth: student.dateOfBirth,
+        admissionDate: student.admissionDate,
+        fees: student.fees,
+        status: student.status,
+        avatar:
+          student.avatar ||
+          `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face`,
+      }));
+
+      setStudents(transformed);
+    } catch (err) {
+      setError(err.message || "Failed to fetch students");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await SendGETRequest(API.Students);
-        console.log("Fetched students:", response);
-
-        // Validate response structure
-        if (
-          !response ||
-          !response.data ||
-          !Array.isArray(response.data.students)
-        ) {
-          console.error("Invalid response structure:", response);
-          setError("Invalid data format received");
-          return;
-        }
-
-        const transformed = response.data.students.map((student) => ({
-          id: student._id,
-          name: student.name,
-          class: student.standard,
-          board: student.board,
-          school: student.school,
-          email: student.parentEmail,
-          phone: student.mobilePhone1,
-          address: student.address,
-          dateOfBirth: student.dateOfBirth,
-          admissionDate: student.admissionDate,
-          fees: student.fees,
-          status: student.status,
-          avatar:
-            student.avatar ||
-            `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face`,
-        }));
-
-        console.log("Transformed students:", transformed);
-        setStudents(transformed);
-      } catch (error) {
-        console.error("Failed to fetch students:", error);
-        setError(error.message || "Failed to fetch students");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStudents();
-  }, []);
+  }, [fetchStudents]);
+
+  useEffect(() => {
+    if (!openStudentForm && addModalWasOpen.current) {
+      fetchStudents();
+    }
+    addModalWasOpen.current = openStudentForm;
+  }, [openStudentForm, fetchStudents]);
 
   // console.log("Students state:", students);
 
@@ -272,6 +276,24 @@ const StudentTable = () => {
     }
   };
 
+  const handleEditSave = (updatedStudent) => {
+    setStudents((prev) => prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)));
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteStudent) return;
+    setDeleteLoading(true);
+    try {
+      await axios.delete(API.deleteStudent(deleteStudent.id));
+      setStudents((prev) => prev.filter((s) => s.id !== deleteStudent.id));
+      setDeleteStudent(null);
+    } catch (err) {
+      setError(err.response?.data?.msg || "Failed to delete student");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const getSortIcon = (field) => {
     if (sortField !== field) return <FaSort className="text-gray-400" />;
     return sortDirection === "asc" ? (
@@ -292,7 +314,10 @@ const StudentTable = () => {
 
   const ActionButton = ({ icon: Icon, color, onClick, tooltip }) => (
     <button
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
       className={`p-2 rounded-lg ${color} transition-all duration-200 hover:scale-105 group relative`}
       title={tooltip}
       style={{ outline: "none" }}
@@ -350,21 +375,21 @@ const StudentTable = () => {
           {/* Actions */}
           <div className="flex gap-1">
             <button
-              onClick={() => console.log("View", student.id)}
+              onClick={() => setViewStudent(student)}
               className="p-1 rounded bg-blue-50 text-blue-700"
               aria-label="view"
             >
               <FaEye className="w-3 h-3" />
             </button>
             <button
-              onClick={() => console.log("Edit", student.id)}
+              onClick={() => setEditStudent(student)}
               className="p-1 rounded bg-yellow-50 text-yellow-700"
               aria-label="edit"
             >
               <FaEdit className="w-3 h-3" />
             </button>
             <button
-              onClick={() => console.log("Delete", student.id)}
+              onClick={() => setDeleteStudent(student)}
               className="p-1 rounded bg-red-50 text-red-700"
               aria-label="delete"
             >
@@ -375,6 +400,270 @@ const StudentTable = () => {
       ))}
     </div>
   );
+
+  const StudentCard = ({ student }) => (
+    <div className="bg-white rounded-xl shadow p-5 space-y-4 border border-gray-100">
+      <div className="flex items-center gap-3">
+        <img
+          src={student.avatar}
+          alt={student.name}
+          className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-500/20"
+        />
+        <div>
+          <div className="font-semibold text-gray-900">{student.name}</div>
+          <div className="text-sm text-gray-500 flex items-center gap-2">
+            <FaSchool />
+            {student.school || "-"}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
+        <div className="flex items-center gap-2"><FaGraduationCap className="text-blue-500" />{student.class || "-"}</div>
+        <div className="flex items-center gap-2"><FaMapMarkerAlt className="text-blue-500" />{student.board || "-"}</div>
+        <div className="flex items-center gap-2"><FaEnvelope className="text-blue-500" />{student.email || "-"}</div>
+        <div className="flex items-center gap-2"><FaPhone className="text-blue-500" />{student.phone || "-"}</div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className={getStatusBadge(student.status)}>{student.status}</span>
+        <div className="flex gap-1">
+          <ActionButton
+            icon={FaEye}
+            color="bg-blue-100 text-blue-600 hover:bg-blue-200"
+            onClick={() => setViewStudent(student)}
+            tooltip="View"
+          />
+          <ActionButton
+            icon={FaEdit}
+            color="bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
+            onClick={() => setEditStudent(student)}
+            tooltip="Edit"
+          />
+          <ActionButton
+            icon={FaTrash}
+            color="bg-red-100 text-red-600 hover:bg-red-200"
+            onClick={() => setDeleteStudent(student)}
+            tooltip="Delete"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const EditStudentModal = ({ student, onClose, onSave }) => {
+    const [formData, setFormData] = useState({
+      name: student?.name || "",
+      standard: student?.class || "",
+      board: student?.board || "",
+      school: student?.school || "",
+      parentEmail: student?.email || "",
+      mobilePhone1: student?.phone || "",
+      address: student?.address || "",
+      fees: student?.fees || "",
+      status: student?.status || "Active",
+    });
+    const [saving, setSaving] = useState(false);
+    const [localError, setLocalError] = useState("");
+
+    if (!student) return null;
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setSaving(true);
+      setLocalError("");
+      try {
+        await axios.patch(API.updateStudent(student.id), formData);
+        onSave({
+          ...student,
+          name: formData.name,
+          class: formData.standard,
+          board: formData.board,
+          school: formData.school,
+          email: formData.parentEmail,
+          phone: formData.mobilePhone1,
+          address: formData.address,
+          fees: formData.fees,
+          status: formData.status,
+        });
+        onClose();
+      } catch (err) {
+        setLocalError(err.response?.data?.msg || "Failed to update student");
+      } finally {
+        setSaving(false);
+      }
+    };
+
+    return (
+      <Modal isOpen={!!student} onClose={onClose} title="Edit Student" size="lg">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {localError && (
+            <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">{localError}</div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
+              <input
+                type="text"
+                value={formData.standard}
+                onChange={(e) => setFormData({ ...formData, standard: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Board</label>
+              <input
+                type="text"
+                value={formData.board}
+                onChange={(e) => setFormData({ ...formData, board: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">School</label>
+              <input
+                type="text"
+                value={formData.school}
+                onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={formData.parentEmail}
+                onChange={(e) => setFormData({ ...formData, parentEmail: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="tel"
+                value={formData.mobilePhone1}
+                onChange={(e) => setFormData({ ...formData, mobilePhone1: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fees</label>
+              <input
+                type="text"
+                value={formData.fees}
+                onChange={(e) => setFormData({ ...formData, fees: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <textarea
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows="3"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+    );
+  };
+
+  const ViewStudentModal = ({ student, onClose }) => {
+    if (!student) return null;
+    return (
+      <Modal isOpen={!!student} onClose={onClose} title="Student Details" size="lg">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <img
+              src={student.avatar}
+              alt={student.name}
+              className="w-16 h-16 rounded-full object-cover ring-4 ring-blue-500/20"
+            />
+            <div>
+              <div className="text-xl font-semibold text-gray-900">{student.name}</div>
+              <span className={getStatusBadge(student.status)}>{student.status}</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+            <div><strong>Class:</strong> {student.class || "-"}</div>
+            <div><strong>Board:</strong> {student.board || "-"}</div>
+            <div><strong>School:</strong> {student.school || "-"}</div>
+            <div><strong>Fees:</strong> {student.fees || "-"}</div>
+            <div><strong>Email:</strong> {student.email || "-"}</div>
+            <div><strong>Phone:</strong> {student.phone || "-"}</div>
+            <div className="md:col-span-2"><strong>Address:</strong> {student.address || "-"}</div>
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
+    );
+  };
+
+  const DeleteConfirmModal = ({ student, onClose, onConfirm, loading }) => {
+    if (!student) return null;
+    return (
+      <Modal isOpen={!!student} onClose={onClose} title="Delete Student" size="sm">
+        <div className="space-y-4">
+          <p className="text-gray-700">Are you sure you want to delete <strong>{student.name}</strong>?</p>
+          <div className="flex justify-end gap-3">
+            <button onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" disabled={loading}>Cancel</button>
+            <button onClick={onConfirm} disabled={loading} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">{loading ? "Deleting..." : "Delete"}</button>
+          </div>
+        </div>
+      </Modal>
+    );
+  };
 
   if (loading) {
     return (
@@ -408,10 +697,6 @@ const StudentTable = () => {
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        {openStudentForm && (
-          <AddStudent isOpen={openStudentForm} setIsOpen={setOpenStudentForm} />
-        )}
-
         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -684,7 +969,7 @@ const StudentTable = () => {
               <tbody className="divide-y divide-gray-100">
                 {filteredAndSortedStudents.map((student) => (
                   <tr
-                    key={students.id}
+                    key={student.id}
                     onClick={() => {
                       console.log("Clicked student ID:", student.id); // 👈 log here
                       handleGetByID(student.id);
@@ -724,19 +1009,19 @@ const StudentTable = () => {
                       <ActionButton
                         icon={FaEye}
                         color="bg-blue-100 text-blue-600 hover:bg-blue-200"
-                        onClick={() => console.log("View", student.id)}
+                        onClick={() => setViewStudent(student)}
                         tooltip="View Details"
                       />
                       <ActionButton
                         icon={FaEdit}
                         color="bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
-                        onClick={() => console.log("Edit", student.id)}
+                        onClick={() => setEditStudent(student)}
                         tooltip="Edit Student"
                       />
                       <ActionButton
                         icon={FaTrash}
                         color="bg-red-100 text-red-600 hover:bg-red-200"
-                        onClick={() => console.log("Delete", student.id)}
+                        onClick={() => setDeleteStudent(student)}
                         tooltip="Delete Student"
                       />
                     </td>
@@ -778,24 +1063,29 @@ const StudentTable = () => {
         />
       </Modal>
 
-      {/* Add Student Modal */}
-      {openStudentForm && (
-        <AddStudent
-          isOpen={openStudentForm}
-          onClose={() => setOpenStudentForm(false)}
-          onStudentAdded={(newStudent) => {
-            setStudents((prev) => [
-              ...prev,
-              {
-                ...newStudent,
-                id: `temp_${Date.now()}`,
-                avatar:
-                  newStudent.avatar ||
-                  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-              },
-            ]);
-            setOpenStudentForm(false);
-          }}
+      {viewStudent && (
+        <ViewStudentModal student={viewStudent} onClose={() => setViewStudent(null)} />
+      )}
+
+      {deleteStudent && (
+        <DeleteConfirmModal
+          student={deleteStudent}
+          onClose={() => setDeleteStudent(null)}
+          onConfirm={handleDeleteConfirm}
+          loading={deleteLoading}
+        />
+      )}
+
+      {/* Add/Edit Student Modal */}
+      {(openStudentForm || editStudent) && (
+        <AddStudent 
+          isOpen={openStudentForm || !!editStudent} 
+          setIsOpen={(value) => {
+            setOpenStudentForm(value);
+            if (!value) setEditStudent(null);
+          }} 
+          studentData={editStudent}
+          onUpdate={handleEditSave}
         />
       )}
     </div>

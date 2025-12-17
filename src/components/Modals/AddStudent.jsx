@@ -14,14 +14,98 @@ import { Select } from "../commonFunctions/CommonSelectFxn";
 import MaskedDatePicker from "../commonFunctions/MaskedDatePicker";
 import { API } from "../../API/API";
 import useMutateHook from "../../utils/useMutateHook";
+import axios from "axios";
 
-const AddStudent = ({ isOpen, setIsOpen }) => {
-  const [currentStep, setCurrentStep] = useState(1);
- const { mutate, isLoading } =  useMutateHook(
-    "",
-    "Student added successfully!",
-    "Failed to add student!"
+// InputField component MUST be outside AddStudent to prevent re-creation on every render
+const InputField = React.memo(function InputField({
+  icon: Icon,
+  type = "text",
+  placeholder,
+  name,
+  rules = {},
+  disabled = false,
+  prefix,
+  CustomComponent,
+  setDate,
+  date,
+  control,  // ✅ Passed as prop
+  errors,   // ✅ Passed as prop
+}) {
+  return (
+    <div className="space-y-1">
+      <Controller
+        name={name}
+        control={control}
+        rules={rules}
+        render={({ field }) => {
+          if (CustomComponent) {
+            return (
+              <CustomComponent
+                {...field}
+                value={field.value ?? ""}
+                setDate={setDate}
+                date={date}
+                disabled={disabled}
+              />
+            );
+          }
+
+          return (
+            <div
+              className={`flex items-center gap-3 border-2 ${
+                errors[name] ? "border-red-300" : "border-gray-200"
+              } bg-white rounded-xl px-4 py-3 shadow-sm
+              focus-within:border-blue-500 focus-within:ring-4
+              focus-within:ring-blue-500/10 transition-all duration-300
+              hover:border-gray-300 ${disabled ? "bg-gray-50" : ""}`}
+            >
+              {Icon && (
+                <Icon
+                  className={`text-lg flex-shrink-0 ${
+                    disabled
+                      ? "text-gray-300"
+                      : errors[name]
+                      ? "text-red-400"
+                      : "text-gray-400"
+                  }`}
+                />
+              )}
+
+              {prefix && (
+                <span className="text-gray-500 border-r border-gray-200 pr-3">
+                  {prefix}
+                </span>
+              )}
+
+              <input
+                {...field}
+                value={field.value ?? ""}
+                type={type}
+                placeholder={placeholder}
+                disabled={disabled}
+                className={`w-full outline-none text-sm bg-transparent ${
+                  disabled ? "text-gray-400" : ""
+                }`}
+              />
+            </div>
+          );
+        }}
+      />
+
+      {errors[name] && (
+        <p className="text-red-500 text-xs mt-1 ml-1">
+          {errors[name].message}
+        </p>
+      )}
+    </div>
   );
+});
+
+const AddStudent = ({ isOpen, setIsOpen, studentData = null, onUpdate }) => {
+  const isEditMode = !!studentData;
+  const [currentStep, setCurrentStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const {
     control,
@@ -32,7 +116,23 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
     setValue,
     watch,
   } = useForm({
-    defaultValues: {
+    defaultValues: studentData ? {
+      firstname: studentData.name?.split(' ')[0] || "",
+      middlename: studentData.name?.split(' ')[1] || "",
+      lastname: studentData.name?.split(' ').slice(2).join(' ') || "",
+      parentEmail: studentData.email || "",
+      standard: studentData.class || "",
+      board: studentData.board || "",
+      school: studentData.school || "",
+      fees: studentData.fees || 5000,
+      address: studentData.address || "",
+      city: studentData.city || "",
+      state: studentData.state || "",
+      phoneNumber: studentData.phone || "",
+      dateOfBirth: studentData.dateOfBirth || "",
+      admissionDate: studentData.admissionDate || new Date().toISOString().split("T")[0],
+      mobilePhone1: studentData.phone || "",
+    } : {
       firstname: "",
       middlename: "",
       lastname: "",
@@ -47,185 +147,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
       phoneNumber: "",
       dateOfBirth: "",
       admissionDate: new Date().toISOString().split("T")[0],
-      mobilePhone1:"9832144431"
-    },
-    mode: "onBlur",
-  });
-
-  const watchValues = watch();
-
-  // Static data moved outside component to prevent re-creation
-  const standardClassOptions = [
-    { label: "7th Standard", value: 7 },
-    { label: "8th Standard", value: 8 },
-    { label: "9th Standard", value: 9 },
-    { label: "10th Standard", value: 10 },
-  ];
-
-  const boardOptions = [
-    { label: "CBSE", value: "cbse" },
-    { label: "ICSE", value: "icse" },
-    { label: "State Board", value: "state" },
-    { label: "IB", value: "ib" },
-  ];
-
-  const stateOptions = [
-    { label: "Gujarat", value: "gujarat" },
-    { label: "Maharashtra", value: "maharashtra" },
-    { label: "Delhi", value: "delhi" },
-    { label: "Karnataka", value: "karnataka" },
-  ];
-
-  // Validation rules for each step
-  const stepValidationFields = {
-    1: ["firstname", "lastname", "parentEmail", "dateOfBirth"],
-    2: ["standard", "board", "school"],
-    3: ["address", "city", "state", "phoneNumber"],
-  };
-
-  const nextStep = useCallback(async () => {
-    const fieldsToValidate = stepValidationFields[currentStep];
-    const isValid = await trigger(fieldsToValidate);
-
-    if (isValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, 3));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const prevStep = useCallback(() => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-  }, []);
-
-  const onSubmit =  useCallback(
-   async (data) =>  {
-      console.log("Form submitted:", data);
-      await mutate({
-        url: API.AddStudent,
-        input: data,
-      });
-      setIsOpen(false);
-      setCurrentStep(1);
-      reset();
-    },
-    [setIsOpen, reset]
-  );
-
-  const handleClose = useCallback(() => {
-    setIsOpen(false);
-    setCurrentStep(1);
-    reset();
-  }, [setIsOpen, reset]);
-
-  // Optimized input component
-  const InputField = React.memo(
-    ({
-      icon: Icon,
-      type = "text",
-      placeholder,
-      name,
-      rules = {},
-      disabled = false,
-      prefix,
-      CustomComponent,
-      setDate,
-      date,
-
-    }) => (
-      <div className="space-y-1">
-        <Controller
-          name={name}
-          control={control}
-          rules={rules}
-          render={({ field }) => (
-            <>
-              {!CustomComponent ? (
-                <div
-                  className={`flex items-center gap-3 border-2 ${
-                    errors[name] ? "border-red-300" : "border-gray-200"
-                  } bg-white rounded-xl px-4 py-3 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 hover:border-gray-300 ${
-                    disabled ? "bg-gray-50" : ""
-                  }`}
-                >
-                  {!CustomComponent && (
-                    <Icon
-                      className={`text-lg flex-shrink-0 ${
-                        disabled
-                          ? "text-gray-300"
-                          : errors[name]
-                          ? "text-red-400"
-                          : "text-gray-400"
-                      }`}
-                    />
-                  )}
-                  {prefix && (
-                    <span className="text-gray-500 border-r border-gray-200 pr-3">
-                      {prefix}
-                    </span>
-                  )}
-                  {!CustomComponent && (
-                    <input
-                      {...field}
-                      type={type}
-                      placeholder={placeholder}
-                      disabled={disabled}
-                      className={`w-full outline-none text-sm bg-transparent ${
-                        disabled ? "text-gray-400" : ""
-                      }`}
-                    />
-                  )}
-                </div>
-              ) : (
-                <CustomComponent
-                  {...field}
-                  setDate={setDate}
-                  date={date}
-                  disabled={disabled}
-                  name={name}
-                  // className={`w-full outline-none text-sm bg-transparent ${
-                  //   disabled ? "text-gray-400" : ""
-                  // }`}
-                />
-              )}
-            </>
-          )}
-        />
-        {errors[name] && (
-          <p className="text-red-500 text-xs mt-1 ml-1">
-            {errors[name].message}
-          </p>
-        )}
-      </div>
-    )
-  );
-
-const AddStudent = ({ isOpen, setIsOpen }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-    trigger,
-    setValue,
-    watch,
-  } = useForm({
-    defaultValues: {
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      parentEmail: "",
-      standard: "",
-      board: "",
-      school: "",
-      fees: "",
-      address: "",
-      city: "",
-      state: "",
-      phoneNumber: "",
-      dateOfBirth: "",
-      admissionDate: "",
+      mobilePhone1: "9832144431",
     },
     mode: "onBlur",
   });
@@ -255,7 +177,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
   ];
 
   const stepValidationFields = {
-    1: ["firstName", "lastName", "parentEmail", "dateOfBirth", "admissionDate"],
+    1: ["firstname", "lastname", "parentEmail", "dateOfBirth", "admissionDate"],
     2: ["standard", "board", "school"],
     3: ["address", "city", "state", "phoneNumber"],
   };
@@ -271,13 +193,62 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
   }, []);
 
   const onSubmit = useCallback(
-    (data) => {
-      console.log("Form submitted:", data);
-      setIsOpen(false);
-      setCurrentStep(1);
-      reset();
+    async (data) => {
+      setSubmitting(true);
+      setSubmitError("");
+      try {
+        const payload = {
+          firstname: data.firstname,
+          middlename: data.middlename || "",
+          lastname: data.lastname,
+          parentEmail: data.parentEmail,
+          standard: data.standard,
+          board: data.board,
+          school: data.school,
+          fees: data.fees,
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          mobilePhone1: data.phoneNumber,
+          mobilePhone2: data.mobilePhone2 || "",
+          admissionDate: data.admissionDate,
+          tenure: data.tenure || "",
+        };
+
+        if (isEditMode) {
+          // Update existing student
+          await axios.patch(API.updateStudent(studentData.id), payload);
+          if (onUpdate) {
+            onUpdate({
+              ...studentData,
+              name: `${data.firstname} ${data.middlename || ''} ${data.lastname}`.trim(),
+              class: data.standard,
+              board: data.board,
+              school: data.school,
+              email: data.parentEmail,
+              phone: data.phoneNumber,
+              address: data.address,
+              city: data.city,
+              state: data.state,
+              fees: data.fees,
+            });
+          }
+        } else {
+          // Add new student
+          await axios.post(API.AddStudent, payload);
+        }
+        
+        setIsOpen(false);
+        setCurrentStep(1);
+        reset();
+      } catch (error) {
+        console.error(isEditMode ? "Failed to update student:" : "Failed to add student:", error);
+        setSubmitError(error.response?.data?.msg || error.message || (isEditMode ? "Failed to update student" : "Failed to add student"));
+      } finally {
+        setSubmitting(false);
+      }
     },
-    [setIsOpen, reset]
+    [setIsOpen, reset, isEditMode, studentData, onUpdate]
   );
 
   const handleClose = useCallback(() => {
@@ -297,11 +268,11 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
         <div className="sticky top-0 bg-white border-b border-gray-100 px-8 pt-8 pb-4 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex gap-3 items-center">
-              <div className={`w-12 h-12 ${brandGradient} rounded-full flex items-center justify-center shadow-lg`}>
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
                 <FaGraduationCap className="text-white text-2xl" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-[#2F7FFF] tracking-tight">Add New Student</h2>
+                <h2 className="text-2xl font-bold text-[#2F7FFF] tracking-tight">{isEditMode ? 'Edit Student' : 'Add New Student'}</h2>
                 <p className="text-gray-400 text-xs mt-1 font-medium">Step {currentStep} of 3</p>
               </div>
             </div>
@@ -321,7 +292,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                       step <= currentStep
-                        ? `${brandGradient} text-white shadow-md`
+                        ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md"
                         : "bg-gray-200 text-gray-400"
                     }`}
                   >
@@ -331,7 +302,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                     <div
                       className={`flex-1 h-2 mx-2 rounded-full transition-all duration-300 ${
                         step < currentStep
-                          ? brandGradient
+                          ? "bg-gradient-to-r from-blue-600 to-blue-700"
                           : "bg-gray-200"
                       }`}
                     />
@@ -349,7 +320,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
             {currentStep === 1 && (
               <div className="space-y-6">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className={`w-14 h-14 ${accentGradient} rounded-full flex items-center justify-center shadow-lg`}>
+                  <div className="w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
                     <FaGraduationCap className="text-white text-2xl" />
                   </div>
                   <div>
@@ -411,6 +382,9 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                   errors={errors}
                 />
                 <div className="flex gap-2 justify-center">
+                  <div className="flex flex-col">
+
+                  <label htmlFor="Date of Birth " className=" text-gray-500">Date of Birth</label>
                   <InputField
                     icon={IoCalendarSharp}
                     type="date"
@@ -420,10 +394,14 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                     date={dateOfBirth}
                     className={'w-60'}
                     rules={{ required: "Date of birth is required" }}
-                    CustomComponent={MaskedDatePicker}
+                    // CustomComponent={MaskedDatePicker}
                     control={control}
                     errors={errors}
                   />
+                    </div>
+                  <br />
+                  <div className="flex flex-col ">
+                  <label htmlFor="Addmission Date" className=" text-gray-500">Addmission Date</label>
                   <InputField
                     icon={IoCalendarSharp}
                     type="date"
@@ -432,17 +410,18 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
                     setDate={setValue}
                     date={admissionDate}
                     rules={{ required: "Admission Date is required" }}
-                    CustomComponent={MaskedDatePicker}
+                    // CustomComponent={MaskedDatePicker}
                     control={control}
                     errors={errors}
                   />
+                  </div>
                 </div>
               </div>
             )}
             {currentStep === 2 && (
               <div className="space-y-6">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className={`w-14 h-14 ${accentGreen} rounded-full flex items-center justify-center shadow-lg`}>
+                  <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
                     <IoSchoolSharp className="text-white text-2xl" />
                   </div>
                   <div>
@@ -507,7 +486,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className={`w-14 h-14 ${accentOrange} rounded-full flex items-center justify-center shadow-lg`}>
+                  <div className="w-14 h-14 bg-gradient-to-r from-green-600 to-teal-600 rounded-full flex items-center justify-center shadow-lg">
                     <IoLocationSharp className="text-white text-2xl" />
                   </div>
                   <div>
@@ -620,10 +599,10 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
               ) : (
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || submitting}
                   className="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? "Adding..." : "Add Student"}
+                  {(isSubmitting || submitting) ? (isEditMode ? "Updating..." : "Adding...") : (isEditMode ? "Update Student" : "Add Student")}
                 </button>
               )}
             </div>
@@ -632,6 +611,7 @@ const AddStudent = ({ isOpen, setIsOpen }) => {
       </div>
     </div>
   );
-};
+}
+// };
 
 export default AddStudent;

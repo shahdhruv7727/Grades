@@ -4,7 +4,13 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
 
+/* ================= FIX #1 =================
+   Make formatDate SAFE
+   Prevent calling getDate() on non-Date
+=========================================== */
 const formatDate = (date) => {
+  if (!(date instanceof Date)) return "";
+
   const dd = String(date.getDate()).padStart(2, "0");
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const yyyy = date.getFullYear();
@@ -12,10 +18,12 @@ const formatDate = (date) => {
 };
 
 const convertStringIntoDateObject = (value) => {
-  if (value) {
-    const date = value?.includes("/") ? value?.split("/") : value?.split("-");
-    return new Date(`${date[2]}-${date[1]}-${date[0]}`);
-  }
+  if (!value) return null;
+
+  const date = value.includes("/") ? value.split("/") : value.split("-");
+  if (date.length !== 3) return null;
+
+  return new Date(`${date[2]}-${date[1]}-${date[0]}`);
 };
 
 const parseDate = (str) => {
@@ -43,25 +51,49 @@ const MaskedDatePicker = ({
   className = "border-none outline-none",
   placeholder
 }) => {
-  const [inputValue, setInputValue] = useState(date ? formatDate(date) : "");
+
+  /* ================= FIX #2 =================
+     Do NOT call formatDate in useState
+     (date can be string on first render)
+  =========================================== */
+  const [inputValue, setInputValue] = useState("");
   const [openCalendar, setOpenCalendar] = useState(false);
-  const [dateValue, setDateValue] = useState(date);
+  const [dateValue, setDateValue] = useState(null);
+
   const datepickerRef = useRef(null);
-  let today = new Date();
+
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  /* ================= FIX #3 =================
+     Sync date safely in useEffect
+     Correct dependency array
+  =========================================== */
   useEffect(() => {
-    if (typeof date === "string") {
-      setDateValue(convertStringIntoDateObject(date));
+    if (!date) {
+      setInputValue("");
+      setDateValue(null);
+      return;
     }
-  }, [dateValue, date]);
+
+    const parsed =
+      typeof date === "string"
+        ? convertStringIntoDateObject(date)
+        : date;
+
+    if (parsed instanceof Date && !isNaN(parsed)) {
+      setDateValue(parsed);
+      setInputValue(formatDate(parsed));
+    }
+  }, [date]);
 
   const handleInputChange = (e) => {
     const val = e.target.value;
+
     let formatted = val
       .replace(/[^\d]/g, "")
       .slice(0, 8)
-      .replace(/(\d{2})(\d{0,2})(\d{0,4})/, (match, p1, p2, p3) =>
+      .replace(/(\d{2})(\d{0,2})(\d{0,4})/, (_, p1, p2, p3) =>
         [p1, p2, p3].filter(Boolean).join("/")
       );
 
@@ -72,98 +104,65 @@ const MaskedDatePicker = ({
   };
 
   const handleDateSelect = (selected) => {
+    if (!(selected instanceof Date)) return;
+
     setDate(name, selected);
     setDateValue(selected);
     setInputValue(formatDate(selected));
   };
 
   const handleInputKeyDown = (e) => {
-    if (e.key === "Enter") {
-      let value = e.target.value;
-      console.log(value, String(value).substring(0,2),String(value).substring(
-          3
-        ), value.length == 3 ,
-        Number(String(value).substring(0, 2)) < 31 &&
-        String(value).substring(3));
-      if (value.length == 1 && value && value < 31) {
-        let input = `${String(value).padStart(2, "0")}/${String(
-          today.getMonth() + 1
-        ).padStart(2, "0")}/${String(today.getFullYear())}`;
-        setInputValue(input);
-        setDateValue(convertStringIntoDateObject(input));
-      } else if (value.length == 2 && value && value < 31) {
-        let input = `${value}/${String(today.getMonth() + 1).padStart(
-          2,
-          "0"
-        )}/${String(today.getFullYear())}`;
-        setInputValue(input);
-        setDateValue(convertStringIntoDateObject(input));
-      } else if (
-        value.length == 4 &&
-        String(value).substring(0, 2) < 31 &&
-        String(value).substring(3) &&
-        String(value).substring(0, 2)
-      ) {
-        let input = `${value.substring(0, 2)}/${String(value).substring(3).padStart(
-          2,
-          "0"
-        )}/${String(today.getFullYear())}`;
-        setInputValue(input);
-        setDateValue(convertStringIntoDateObject(input));
-      } else if ( value.length == 5 && String(value).substring(0,2) < 31 && String(value).substring(0,2) && String(value).substring(3) < 31 && String(value).substring(3) ) {
-        let input = `${value.substring(0, 2)}/${String(value).substring(3).padStart(
-          2,
-          "0"
-        )}/${String(today.getFullYear())}`;
-        setInputValue(input);
-        setDateValue(convertStringIntoDateObject(input));
-      } else if ( value.length == 8 && String(value).substring(0,2) < 31 && String(value).substring(3,5) < 31 && String(value).substring(6,8)) {
-        let input = `${value.substring(0,2)}/${String(value).substring(3,5).padStart(2,"0")}/${String(value).substring(6,8)}${String(today.getFullYear()).substring(0,2)}`
-        setInputValue(input);
-        setDateValue(convertStringIntoDateObject(input));
-      }
+    if (e.key !== "Enter") return;
+
+    const value = e.target.value;
+    let finalDate = null;
+
+    if (value.length <= 2 && Number(value) > 0 && Number(value) <= 31) {
+      finalDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        Number(value)
+      );
+    }
+
+    if (finalDate) {
+      setDateValue(finalDate);
+      setInputValue(formatDate(finalDate));
     }
   };
 
   return (
-    <div
-      className={`flex items-center gap-3 border border-gray-300 bg-white rounded-md px-4 mb-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 py-1.5 justify-between w-[20vw]`}
-    >
+    <div className="flex items-center gap-3 border border-gray-300 bg-white rounded-md px-4 mb-4 shadow-sm py-1.5 w-[20vw]">
       <DatePicker
         selected={dateValue}
         onChange={handleDateSelect}
         dateFormat="dd/MM/yyyy"
         ref={datepickerRef}
-        className="w-full sm:w-32 outline-none text-sm py-1 bg-transparent placeholder-gray-400"
-        customInput={
-          <div className="border-none outline-none">
-            <input
-              id="datepicker"
-              type="text"
-              className={`border-none outline-none ${className}`}
-              name={name}
-              placeholder={`${placeholder}`}
-              value={inputValue}
-              disabled={disabled}
-              onChange={handleInputChange}
-              onKeyDown={handleInputKeyDown}
-              inputMode="numeric"
-              required
-              // readOnly // Optional: prevent manual typing
-            />
-          </div>
-        }
+        open={openCalendar}
+        onClickOutside={() => setOpenCalendar(false)}
         showMonthDropdown
         showYearDropdown
         dropdownMode="select"
-        shouldCloseOnSelect={true}
-        open={openCalendar}
-        onClickOutside={() => setOpenCalendar(false)}
+        customInput={
+          <input
+            id="datepicker"
+            type="text"
+            className={`border-none outline-none ${className}`}
+            name={name}
+            placeholder={placeholder}
+            value={inputValue}
+            disabled={disabled}
+            onChange={handleInputChange}
+            onKeyDown={handleInputKeyDown}
+            inputMode="numeric"
+            required
+          />
+        }
       />
       <button
         type="button"
         className="ml-1 text-gray-600 hover:text-blue-600"
-        onClick={() => setOpenCalendar((prev) => !prev)}
+        onClick={() => setOpenCalendar((p) => !p)}
       >
         <FaCalendarAlt className="text-lg" />
       </button>
